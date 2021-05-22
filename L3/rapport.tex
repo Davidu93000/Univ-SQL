@@ -1,0 +1,1537 @@
+\documentclass{report}
+
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[document]{ragged2e}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=1cm]{geometry}
+\usepackage{lipsum}
+\usepackage{color}
+\usepackage{float}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    %linkcolor=red,
+    urlcolor=red,
+    filecolor=blue,
+    pdftitle={Rapport Bases de données},
+    pdfsubject={Bases de données},
+    pdfauthor={David HONG},
+    pdfkeywords={SQL} {Bases de données},
+    pdfcreator={David HONG},
+    pdfproducer={David HONG}
+    %pdfpagemode=FullScreen,
+}
+\usepackage{listings}
+\lstdefinestyle{sql}{
+  basicstyle=\footnotesize,			% Codes
+  breaklines=true,				% Nouvelle ligne automatique
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{blue}\bfseries,
+  language=sql,
+}
+\lstset{
+  literate=
+  {à}{{\`a}}1
+  {À}{{\`A}}1
+  {ä}{{\"a}}1
+  {ç}{{\c c}}1
+  {é}{{\'e}}1
+  {É}{{\'E}}1
+  {è}{{\`e}}1
+  {È}{{\'E}}1
+  {ë}{{\"e}}1
+  {ê}{{\^e}}1
+  {î}{{\^i}}1
+  {ï}{{\"i}}1 
+  {ú}{{\'u}}1
+  {û}{{\^u}}1,
+  style=sql
+}
+
+\title{Rapport Bases de données}
+\author{David HONG}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TP1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\section*{Introduction}
+
+\paragraph{Contenus du rapport : }
+\begin{itemize}
+	\item Le fichier "rapport.pdf" décrivant les TP.
+	\item Un dossier "Images" contenant des dossiers regroupant les screenshots des requêtes des TP classées par TP.
+	\item Des dossiers "TPn" contenant les fichiers script "sql" utilisées.
+\end{itemize}
+
+Les screenshots ont été fait sur le site \url{https://apex.oracle.com}. Les screenshots sont en fait des liens ouvrant les images dans le dossier "Images".
+Si les liens vers les screenshots ne fonctionnent pas il est toujours possible de regarder les screenshots dans le dossier "Images".
+Les noms des fichiers images sont nommées de la façon suivante : tp$_{n}.png$ pour les screenshots des requêtes du tp numéro n, nomTable pour les screenshots des contenus des tables, vue$_{n}$ pour les screenshots des vues.
+Dans le dossier TP5, les fichier gen$_{n}.png$ sont les requêtes de la deuxième partie du TP.
+Dans le dossier TP7, le fichier schemas.png est le schéma E/A de la question 2 du TP7.
+Les numéros sont classés selon l'ordre des requêtes.
+\paragraph{Exemple :} Le fichier "tp5\_8" correspont au screenshot de la requête numéro 8 du TP5.
+
+Les liens ont été testé dans les salles machine, donc il ne devrait pas y avoir de problème.
+
+\chapter{TP1}
+
+\section{Création d'une base de données sous ORACLE}
+
+\subsection{Première création de table}
+
+\paragraph{1)}Nous allons créer une table représentant un étudiant dans un fichier \href{./TP1/etudiants_tp1.sql}{etudiants.sql} contenant le code ci-dessous.
+
+\begin{lstlisting}
+CREATE TABLE ETUDIANTS(
+	NUMERO		NUMBER(4)	PRIMARY KEY,
+	NOM		VARCHAR2(25)	NOT NULL,
+	PRENOM		VARCHAR2(25)	NOT NULL,
+	SEXE		CHAR(1)		CHECK(SEXE IN('F','M')),
+	DATENAISSANCE	DATE		NOT NULL,
+	POIDS 		NUMBER,
+	ANNEE 		NUMBER
+);
+\end{lstlisting}
+
+\paragraph{}Pour créer cette table nous lançons le script \href{./TP1/etudiants_tp1.sql}{etudiants.sql} avec la commande {\tt @etudiants\_tp1.sql;}.
+
+\paragraph{}Un étudiant est caractérisé par:
+\begin{itemize}
+  \item un numéro : {\tt NUMERO}
+  \item un nom : {\tt NOM}
+  \item un prénom : {\tt PRENOM}
+  \item un sexe : {\tt SEXE}
+  \item une date de naissance : {\tt DATENAISSANCE}
+  \item un poids : {\tt POIDS}
+  \item une année : {\tt ANNEE}
+\end{itemize}
+
+\paragraph{2)}Nous allons vérifier que la table a bien été créée à l'aide deux commandes.
+La commande {\tt desc ETUDIANTS;}\footnote{{\tt DESCRIBE} sous ORACLE} et la commande {\tt select * from ETUDIANTS;}
+
+Affichage de {\tt desc ETUDIANTS;} \href{run:./Images/TP1/tp1_desc_etudiants.png}{Image}
+
+\paragraph{}La commande {\tt select * from ETUDIANTS;} affiche toutes les lignes de notre table. Pour l'instant notre table étant vide, cette commande nous indique {\tt aucune ligne sélectionnée}, nous verrons plus tard cette commande lorque nous aurons insérer des lignes.
+
+\paragraph{3)}Dans notre table nous avons défini l'attribut {\tt NUMERO} comme étant la clé primaire. On représente tous les étudiants avec un numéro unique et différent.
+
+\paragraph{4)}Lors de la création de la table nous avons défini plusieurs contraintes.
+\begin{itemize}
+ \item NOM : {\tt NOT NULL}
+ \item PRENOM : {\tt NOT NULL}
+ \item SEXE : {\tt CHECK(SEXE IN('F','M'))}
+ \item DATENAISSANCE : {\tt NOT NULL}
+\end{itemize}
+
+\paragraph{}Les attributs {\tt NOM}, {\tt PRENOM}, {\tt DATENAISSANCE} ne doivent pas être {\tt NULL}.
+L'attribut {\tt SEXE} doit être égale à {\tt 'F'} ou {\tt 'M'}.
+
+\paragraph{5)}Après avoir crée notre table, nous allons insérer des nouvelles lignes dans notre table. Pour cela on utilise la commande {\tt INSERT INTO ETUDIANTS VALUES(valeur1,...);}
+
+\paragraph{}Exemple nous insérons ces étudiants.
+
+\begin{lstlisting}
+INSERT INTO ETUDIANTS VALUES(71,'Traifor','Benoît','M','10/12/1978',77,1);
+INSERT INTO ETUDIANTS VALUES(72,'Génial','Clément','M','10/04/1978',72,1);
+INSERT INTO ETUDIANTS VALUES(73,'Paris','Adam','M','28/06/1974',72,2);
+INSERT INTO ETUDIANTS VALUES(74,'Paris','Clémence','F','20/09/1977',72,NULL);
+INSERT INTO ETUDIANTS VALUES(69,'Saitout','Inès','F','22/11/1969',69,2);
+INSERT INTO ETUDIANTS VALUES(55,'Serafoub','Izouaf','M','19/09/2013',1,0);
+\end{lstlisting}
+
+\paragraph{}Nous allons vérifier le contenu de notre table avec la commande {\tt SELECT * FROM ETUDIANTS;} et voici ce que notre table contient.
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		\verb+NUMERO+ & \verb+NOM+ & \verb+PRENOM+ & \verb+SEXE+ & \verb+DATENAISSANCE+ & \verb+POIDS+ & \verb+ANNEE+ \\
+		\hline
+		71 & Traifor & Benoît & M & 10/12/78 & 77 & 1 \\
+		\hline
+		72 & Génial & Clément & M & 10/04/78 & 72 & 1 \\
+		\hline
+		73 & Paris & Adam & M & 28/06/74 & 72 & 2 \\
+		\hline
+		74 & Paris & Clémence & F & 20/09/77 & 72 & \\
+		\hline
+		69 & Saitout & Inès & F & 22/11/69 & 69 & 2 \\
+		\hline
+		55 & Serafoub & Izouaf & M & 19/09/13 & 1 & 0 \\
+		\hline
+	\end{tabular}
+	\caption{Etudiants}
+\end{table}
+
+\paragraph{6)}Essayons maintenant d'insérer des lignes qui violent les contraintes définies pour cette table. Essayons d'insérer un étudiant avec numéro {\tt NULL}, deux numéros identiques, un numéro à plus de 4 chiffres, un nom {\tt NULL}, un nom qui dépasse 25 caractères, un sexe différent de 'F' ou 'M'.
+Voici ce qui se produit.
+
+\paragraph{}Insertion d'un étudiant dont le numero est {\tt NULL}. \href{run:./Images/TP1/contrainte1.png}{Image}
+
+\paragraph{}Insertion de deux étudiants ayant le même numéro. \href{run:./Images/TP1/contrainte2.png}{Image}
+
+\paragraph{}Insertion d'une étudiant ayant un numéro à 5 chiffres. \href{run:./Images/TP1/contrainte3.png}{Image}
+
+\paragraph{}Insertion d'un étudiant ayant un nom {\tt NULL} (même résultat pour la date et le prénom) \href{run:./Images/TP1/contrainte4.png}{Image}
+
+\paragraph{}Insertion d'un étudiant ayant un {\tt NOM} à plus de 25 lettres. (même résultat pour le prénom) \href{run:./Images/TP1/contrainte5.png}{Image}
+
+\paragraph{}Insertion d'un étudiant ayant {\tt SEXE} différent de {\tt 'M'} ou {\tt 'F'}. \href{run:./Images/TP1/contrainte6.png}{Image}
+
+\subsection{Base de données avec plusieurs tables}
+
+\paragraph{}Nous allons créer plusieurs tables dans un fichier \href{./TP1/ecole_tp1.sql}{ecole\_tp1.sql}. Nous allons créer des tables qui seront "connectées entre elles". Nous aurons les tables :
+\begin{itemize}
+	\item {\tt ELEVES}
+	\item {\tt PROFESSEURS}
+	\item {\tt COURS}
+	\item {\tt CHARGE}
+	\item {\tt RESULTATS}
+	\item {\tt ACTIVITES}
+	\item {\tt ACTIVITES\_PRATIQUEES}
+\end{itemize}
+Voici le contenu de notre fichier.
+
+\begin{lstlisting}
+DROP TABLE ELEVES CASCADE CONSTRAINTS;
+DROP TABLE COURS CASCADE CONSTRAINTS;
+DROP TABLE PROFESSEURS CASCADE CONSTRAINTS;
+DROP TABLE ACTIVITES CASCADE CONSTRAINTS;
+DROP TABLE RESULTATS CASCADE CONSTRAINTS;
+DROP TABLE CHARGE CASCADE CONSTRAINTS;
+DROP TABLE ACTIVITES_PRATIQUEES CASCADE CONSTRAINTS;
+
+CREATE TABLE ELEVES(
+	NUM_ELEVE		NUMBER(4)		,
+	NOM			VARCHAR2(25)		CONSTRAINT NN_ELEVES_NOM NOT NULL,
+	PRENOM			VARCHAR2(25)		CONSTRAINT NN_ELEVES_PRENOM NOT NULL,
+	DATE_NAISSANCE		DATE			,
+	POIDS			NUMBER			,
+	ANNEE			NUMBER			,
+	CONSTRAINT PK_ELEVES_NUM PRIMARY KEY (NUM_ELEVE),
+	CONSTRAINT CK_ELEVES_POIDS CHECK(POIDS >= 0)	,
+	CONSTRAINT CK_ELEVES_ANNEE CHECK(ANNEE >= 0)
+);
+
+CREATE TABLE COURS(
+	NUM_COURS		NUMBER(4)		,
+	NOM			VARCHAR2(25)		CONSTRAINT NN_COURS_NOM NOT NULL,
+	NBHEURES		NUMBER			,
+	ANNEE			NUMBER			,
+	CONSTRAINT PK_COURS PRIMARY KEY (NUM_COURS)	,
+	CONSTRAINT CK_COURS_NBHEURES CHECK(NBHEURES > 0),
+	CONSTRAINT CK_COURS_ANNEE CHECK(ANNEE >= 0)
+);
+
+CREATE TABLE PROFESSEURS(
+	NUM_PROF		NUMBER(4)		,
+	NOM			VARCHAR2(25)		CONSTRAINT NN_PROFESSEURS_NOM NOT NULL,
+	SPECIALITE		VARCHAR2(25)		CONSTRAINT NN_PROFESSEURS_SPECIALITE NOT NULL,
+	DATE_ENTREE		DATE			,
+	DER_PROM		DATE			,
+	SALAIRE_BASE		NUMBER			,
+	SALAIRE_ACTUEL		NUMBER			,
+	CONSTRAINT PK_PROFESSEURS_NUM PRIMARY KEY (NUM_PROF),
+	CONSTRAINT CK_PROFESSEURS_SALAIRE_BASE CHECK(SALAIRE_BASE >= 0),
+	CONSTRAINT CK_PROFESSEURS_SALAIRE_ACTUEL CHECK(SALAIRE_ACTUEL >= 0)
+);
+
+CREATE TABLE ACTIVITES(
+	NIVEAU	NUMBER		,
+	NOM		VARCHAR2(25)	,
+	EQUIPE	VARCHAR2(25)	,
+	CONSTRAINT PK_ACTIVITES PRIMARY KEY (NIVEAU,NOM)
+);
+
+CREATE TABLE RESULTATS(
+	NUM_ELEVE		NUMBER(4)		,
+	NUM_COURS		NUMBER(4)		,
+	POINTS 			NUMBER			,
+	CONSTRAINT FK_ELEVES_NUM_RESULTATS FOREIGN KEY (NUM_ELEVE) REFERENCES ELEVES,
+	CONSTRAINT FK_COURS_NUM_RESULTATS FOREIGN KEY (NUM_COURS) REFERENCES COURS 
+);
+
+CREATE TABLE CHARGE(
+	NUM_PROF		NUMBER(4)		,
+	NUM_COURS		NUMBER(4)		,
+	CONSTRAINT FK_COURS_NUM_CHARGE FOREIGN KEY (NUM_COURS) REFERENCES COURS,
+	CONSTRAINT FK_PROFESSEURS_NUM_CHARGE FOREIGN KEY (NUM_PROF) REFERENCES PROFESSEURS
+);
+
+CREATE TABLE ACTIVITES_PRATIQUEES(
+	NUM_ELEVE		NUMBER(4)		,
+	NIVEAU			NUMBER			,
+	NOM			VARCHAR2(25)		CONSTRAINT NN_NOM_ACTIVITES_PRATIQUEES NOT NULL,
+	CONSTRAINT FK_ELEVES_NUM_AP FOREIGN KEY (NUM_ELEVE) REFERENCES ELEVES,
+	CONSTRAINT FK_ACTIVITES_AP FOREIGN KEY (NIVEAU,NOM) REFERENCES ACTIVITES(NIVEAU,NOM)
+);
+\end{lstlisting}
+
+\paragraph{2)}Ici nous utilisons plusieurs fois la commande {\tt DROP TABLE nom\_table CASCADE CONSTRAINTS;} au début du fichier. Cette commande supprime les tables ainsi que leurs contraintes car lorsque nous allons lancer la commande {\tt @ecole.sql} si on ne le fait pas, les tables ne vont pas pouvoir être créées.
+
+\paragraph{3)}Dans nos tables, nous avons plusieurs clés primaires. Nous utilisons alors la commande {\tt CONSTRAINT \newline nom\_contrainte PRIMARY KEY (attribut1,...)}.
+
+\paragraph{4)}Nous aurons aussi besoin de clés étrangères. Nous utilisons alors la commande {\tt CONSTRAINT nom\_contrainte\_FK FOREIGN KEY (attribut1,...) REFERENCES nom\_table\_de\_reference (attribut1,...);} les attributs doivent être égale.
+
+\paragraph{}Maintenant que nos tables ont été créées, essayons d'insérer des lignes dans les tables.
+
+\begin{lstlisting}
+/* INSERTION ELEVES */
+INSERT INTO ELEVES VALUES(71,'Traifor','Benoît','10/12/1978',77,3);
+INSERT INTO ELEVES VALUES(72,'Génial','Clément','10/04/1978',72,1);
+INSERT INTO ELEVES VALUES(73,'Paris','Adam','28/06/1974',72,2);
+INSERT INTO ELEVES VALUES(74,'Paris','Clémence','20/09/1977',72,NULL);
+INSERT INTO ELEVES VALUES(69,'Saitout','Inès','22/11/1969',69,2);
+
+/* INSERTION COURS */
+INSERT INTO COURS VALUES(1,'Bases de données',20,3);
+INSERT INTO COURS VALUES(2,'Structures de données',20,2);
+INSERT INTO COURS VALUES(3,'Programmation Web',10,3);
+INSERT INTO COURS VALUES(4,'Physique Chimie',20,1);
+INSERT INTO COURS VALUES(5,'On Fait Rien',10000,0);
+
+/* INSERTION PROFESSEURS */
+INSERT INTO PROFESSEURS VALUES(1,'CABANES','INFORMATIQUES',NULL,NULL,50000,50000);
+INSERT INTO PROFESSEURS VALUES(2,'NOM','RIEN',NULL,NULL,0,0);
+
+/* INSERTION ACTIVITES */
+INSERT INTO ACTIVITES VALUES(1,'Football','Sans Nom');
+INSERT INTO ACTIVITES VALUES(2,'Tennis',NULL);
+INSERT INTO ACTIVITES VALUES(3,'Football','Équipe de foot');
+
+/* INSERTION RESULTATS */
+INSERT INTO RESULTATS VALUES(71,1,18);
+INSERT INTO RESULTATS VALUES(71,3,17);
+INSERT INTO RESULTATS VALUES(74,5,20);
+INSERT INTO RESULTATS VALUES(74,2,8);
+INSERT INTO RESULTATS VALUES(72,2,10);
+
+/* INSERTION CHARGE */
+INSERT INTO CHARGE VALUES(1,1);
+INSERT INTO CHARGE VALUES(1,5);
+INSERT INTO CHARGE VALUES(2,5);
+
+/* INSERTION ACTIVITES PRATIQUEES */
+INSERT INTO ACTIVITES_PRATIQUEES VALUES(71,1,'Football');
+INSERT INTO ACTIVITES_PRATIQUEES VALUES(72,3,'Football');
+INSERT INTO ACTIVITES_PRATIQUEES VALUES(74,2,'Tennis');
+\end{lstlisting}
+
+\paragraph{}Nos tables ont bien été ajoutées. Les contraintes sont bien respecté.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TP2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{TP2}
+
+\section{Modification d'une base de données sous ORACLE}
+
+\subsection{Modification de contraintes}
+
+\paragraph{1)}Voici une table représentant un étudiant.
+
+\begin{lstlisting}
+CREATE TABLE ETUDIANTS(
+    NUMERO          NUMBER(4)       NOT NULL,
+    NOM             VARCHAR2(25)    NOT NULL,
+    PRENOM          VARCHAR2(25)    NOT NULL,
+    SEXE            CHAR(1)         CHECK(SEXE IN('F','M')),
+    DATENAISSANCE   DATE            NOT NULL,
+    POIDS           NUMBER          ,
+    ANNEE           NUMBER          ,
+    CONSTRAINT PK_ETUDIANTS PRIMARY KEY (NUMERO)
+);
+\end{lstlisting}
+
+\paragraph{2)}On utilise la commande {\tt select constraint\_name from user\_constraints where table\_name='ETUDIANTS';}.
+Voici le résultat \href{run:./Images/TP2/tp2_contrainte1.png}{contraintes 1}.
+
+\paragraph{}Cette commande liste donc toutes les contraintes ainsi que leurs noms, étant donné que l'on a plusieurs contraintes mais que nous ne les avons pas nommée, ils ont des noms par défaut. Nous allons corriger le code précédent en nommant les contraintes. Voici le résultat \href{run:./Images/TP2/tp2_contrainte2.png}{contraintes 2}.
+
+\begin{lstlisting}
+CREATE TABLE ETUDIANTS(
+	NUMERO             NUMBER(4)		,
+	NOM                VARCHAR2(25)		CONSTRAINT CONTRAINTE1 NOT NULL,
+	PRENOM             VARCHAR2(25)		CONSTRAINT CONTRAINTE2 NOT NULL,
+	SEXE               CHAR(1)		CONSTRAINT CONTRAINTE3 CHECK(SEXE IN ('F','M')),
+	DATENAISSANCE      DATE			CONSTRAINT CONTRAINTE4 NOT NULL,
+	POIDS              NUMBER		,
+	ANNEE              NUMBER		,
+	CONSTRAINT PK_ETUDIANTS PRIMARY KEY (NUMERO)
+);
+\end{lstlisting}
+
+\paragraph{3)}Nous allons ajouter deux nouvelles contraintes.
+\begin{itemize}
+	\item L'année doit être égale à 1 ou 2
+	\item Le poids doit être supérieur à 30kg et inférieur à 200kg
+\end{itemize}
+
+\paragraph{}Pour cela on utilise la commande {\tt ALTER TABLE nom\_table ADD CONSTRAINT nom\_contrainte CHECK(contrainte);}
+
+\begin{lstlisting}
+ALTER TABLE ETUDIANTS ADD CONSTRAINT CK_POIDS CHECK(POIDS > 30 AND POIDS < 200);
+ALTER TABLE ETUDIANTS ADD CONSTRAINT CK_ANNEE CHECK(ANNEE=1 OR ANNEE=2);
+\end{lstlisting}
+
+\paragraph{}On vérifie si les contraintes ont été rajouté. La commande {\tt select constraint\_name from user\_constraints \newline where table\_name='ETUDIANTS';} nous affiche ceci \href{run:./Images/TP2/tp2_contrainte3.png}{contraintes 3}
+
+\paragraph{4)}On renomme les contraintes avec la commande {\tt ALTER TABLE nom\_table RENAME CONSTRAINT nom\_contrainte1 TO nom\_contrainte2;}
+
+\begin{lstlisting}
+ALTER TABLE ETUDIANTS RENAME CONSTRAINT CONTRAINTE1 TO NN_NOM;
+ALTER TABLE ETUDIANTS RENAME CONSTRAINT CONTRAINTE2 TO NN_PRENOM;
+ALTER TABLE ETUDIANTS RENAME CONSTRAINT CONTRAINTE3 TO CK_SEXE;
+ALTER TABLE ETUDIANTS RENAME CONSTRAINT CONTRAINTE4 TO NN_DATENAISSANCE;
+\end{lstlisting}
+
+\paragraph{}Vérifions les noms de nos contraintes \href{run:./Images/TP2/tp2_contrainte4.png}{contraintes 4}.
+
+\subsection{Manipulation de la BD École}
+
+\paragraph{1)}Fichier \href{./TP2/ecole_tp2.sql}{ecole\_tp2.sql}.
+
+\paragraph{2)}Pour ajouter une contrainte de clé étrangère on utilise la commande {\tt ALTER TABLE nom\_table ADD CONSTRAINT nom\_contrainte FOREIGN KEY (colonne) REFERENCES nom\_table(colonne)}. Ajoutons dans le fichier {\tt ecole.sql} les clés étrangères via ces commandes.
+
+\begin{lstlisting}
+ALTER TABLE CHARGE ADD CONSTRAINT FK_PROFESSEURS_NUM_CHARGE FOREIGN KEY (NUM_PROF) REFERENCES PROFESSEURS(NUM_PROF);
+ALTER TABLE CHARGE ADD CONSTRAINT FK_COURS_NUM_CHARGE FOREIGN KEY (NUM_COURS) REFERENCES COURS(NUM_COURS);
+ALTER TABLE RESULTATS ADD CONSTRAINT FK_ELEVES_NUM_RESULTATS FOREIGN KEY (NUM_ELEVE) REFERENCES ELEVES(NUM_ELEVE);
+ALTER TABLE RESULTATS ADD CONSTRAINT FK_COURS_NUM_RESULTATS FOREIGN KEY (NUM_COURS) REFERENCES COURS(NUM_COURS);
+ALTER TABLE ACTIVITES_PRATIQUEES ADD CONSTRAINT PK_ELEVES_NUM_AP FOREIGN KEY (NUM_ELEVE) REFERENCES ELEVES(NUM_ELEVE);
+ALTER TABLE ACTIVITES_PRATIQUEES ADD CONSTRAINT FK_ACTIVITE_AP FOREIGN KEY (NIVEAU,NOM) REFERENCES ACTIVITES(NIVEAU,NOM);
+\end{lstlisting}
+
+\paragraph{3)}Affichage de la commande {\tt DESC ELEVES;} \href{run:./Images/TP2/tp2_desc_eleves.png}{Image}
+
+\paragraph{4)}Pour ajouter des attributs dans une table déjà existante on peut utiliser la commande {\tt ALTER TABLE nom\_table ADD (nom\_colonnes);}. Nous allons ajouter les attributs {\tt CodePostal} et {\tt Ville} dans la table des élèves.
+
+\begin{lstlisting}
+ALTER TABLE ELEVES ADD (
+	CODEPOSTAL		NUMBER(5)		,
+	VILLE			VARCHAR2(20)	
+);
+\end{lstlisting}
+
+\paragraph{5)}Pour mettre à jour les données d'une table, on peut utiliser la commande {\tt UPDATE nom\_table SET colonne = \newline valeur WHERE condition;}
+
+\begin{lstlisting}
+UPDATE ELEVES SET CODEPOSTAL = 75013, VILLE = 'paris' WHERE NUM_ELEVE=1;
+UPDATE ELEVES SET CODEPOSTAL = 93800, VILLE = 'EPINAY / seine' WHERE NUM_ELEVE=2;
+UPDATE ELEVES SET CODEPOSTAL = 93430, VILLE = 'EPINAY SUR SEINE' WHERE NUM_ELEVE=5;
+UPDATE ELEVES SET CODEPOSTAL = 91000, VILLE = 'EPINAY / ORGE' WHERE NUM_ELEVE=7;
+\end{lstlisting}
+
+\paragraph{6)}Nous allons créer une nouvelle table {\tt AGGLOMERATION}.
+
+\begin{lstlisting}
+CREATE TABLE AGGLOMERATION(
+	CP		NUMBER(5),
+	Ville		VARCHAR2(25)
+);
+\end{lstlisting}
+
+\paragraph{7)}Ajout des contraintes dans la table {\tt AGGLOMERATION}.
+\begin{itemize}
+ \item {\tt CP} et {\tt Ville} doivent être la clé primaire de {\tt AGLOMERATION}
+ \item {\tt Ville} doit être en majuscule (fonction {\tt UPPER})
+\end{itemize}
+
+\begin{lstlisting}
+ALTER TABLE AGGLOMERATION ADD CONSTRAINT PK_AGGLOMERATION PRIMARY KEY (CP,VILLE);
+ALTER TABLE AGGLOMERATION ADD CONSTRAINT CK_VILLE_AGGLOMERATION CHECK(VILLE=UPPER(VILLE));
+\end{lstlisting}
+
+\paragraph{8)}La commande {\tt INSERT INTO AGGLOMERATION VALUES(93430,'Villetaneuse');} ne fonctionnera pas car la ville n'est pas en majuscules.
+
+\begin{lstlisting}
+INSERT INTO AGGLOMERATION VALUES(75001,'PARIS');
+INSERT INTO AGGLOMERATION VALUES(75013,'PARIS');
+INSERT INTO AGGLOMERATION VALUES(93800,'EPINAY SUR SEINE');
+INSERT INTO AGGLOMERATION VALUES(93430,UPPER('VILLETANEUSE'));
+INSERT INTO AGGLOMERATION VALUES(91000,'EPINAY SUR ORGE');
+INSERT INTO AGGLOMERATION VALUES(93800,'EPINAY / SEINE');
+\end{lstlisting}
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|}
+		\hline
+		\verb+CP+ & \verb+VILLE+ \\
+		\hline
+		75001 & PARIS \\
+		\hline
+		75013 & PARIS \\
+		\hline
+		91000 & EPINAY SUR ORGE \\
+		\hline
+		93430 & VILLETANEUSE \\
+		\hline
+		93800 & EPINAY / SEINE \\
+		\hline
+		9380 & EPINAY SUR SEINE \\
+		\hline
+	\end{tabular}
+	\caption{Agglomeration}
+\end{table}
+
+\paragraph{9)}On va mettre à jour les noms des villes selon le code postal. Pour cela on utilise la commande {\tt UPDATE Table1 SET AttributAMettreAJour = (SELECT Attribut FROM Table2 WHERE Condition);}
+
+\begin{lstlisting}
+UPDATE ELEVES SET VILLE = (SELECT VILLE FROM AGGLOMERATION WHERE CODEPOSTAL = CP AND ROWNUM = 1);
+\end{lstlisting}
+
+\paragraph{}On utilise {\tt ROWNUM = 1} car dans notre table {\tt AGGLOMERATION} il y a deux code postal avec deux nom de ville différentes ('EPINAY / SEINE' et 'EPINAY SUR SEINE'). Si c'est le cas on va choisir le premier rencontré.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TP3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{TP3}
+
+\section{Fonctions ORACLE}
+
+\subsection{Exploration de quelques fonctions ORACLE}
+
+\paragraph{1)}Nous allons nous intéresser à ces commandes ci-dessous:
+\begin{itemize}
+	\item {\tt SELECT RPAD('Soleil',17,'bla') "RPAD exemple" FROM DUAL;} cette commande prend le mot 'Soleil' et le concatène à la fin la séquence de mot 'bla' jusqu'à ce que la taille du mot soit égale à 17. (cela affiche donc 'Soleilblablablabl') \href{run:./Images/TP3/tp3_fonction1.png}{Image}
+	\item {\tt SELECT LPAD('Master 2 EID',15,'*.') "LPAD exemple" FROM DUAL;} cette commande prend le mot 'Master 2 EID' et le concatène à partir du début la séquence de mot '*.' jusqu'à ce que la taille du mot soit égale à 15. (cela affiche '*.*Master 2 EID') \href{run:./Images/TP3/tp3_fonction2.png}{Image}
+	\item {\tt SELECT SUBSTR('DESS EID',6,3) "SUBSTR exemple" FROM DUAL;} cette commande prend le mot 'DESS EID' et affiche les trois lettres du mot à partir de la 6\up{ième} caractère. (cela affiche 'EID') \href{run:./Images/TP3/tp3_fonction3.png}{Image}
+	\item {\tt SELECT SUBSTR('ABCDEFGHIJ',-5,4) "SUBSTR exemple" FROM DUAL;} cette commande prend le mot 'ABCDEFGHIJ' et affiche les quatre lettres du mot à partir de la 5\up{ième} caractère en partant de la fin du mot. (cela affiche 'FGHI') \href{run:./Images/TP3/tp3_fonction4.png}{Image}
+	\item {\tt SELECT TO\_CHAR(SYSDATE, 'MM-DD-YYYY HH24:MI:SS') "Now" FROM DUAL;} cette commande affiche la date sous forme {\tt MM-DD-YYYY} et l'heure sous forme {\tt heures:minutes:secondes}. \href{run:./Images/TP3/tp3_fonction5.png}{Image}
+	\item {\tt SELECT LENGTH('WEB WAREHOUSE') "Longueur en caractères" FROM DUAL;} cette commande affiche la longueur du mot 'WEB WAREHOUSE'. (cela affiche 13) \href{run:./Images/TP3/tp3_fonction6.png}{Image}
+	\item {\tt SELECT ROUND(17.0958,1) "ROUND exemple" FROM DUAL;} cette commande affiche l'arrondi supérieur du nom-bre 17.0958 à 1 chiffre après la virgule. (cela affiche 17.1) \href{run:./Images/TP3/tp3_fonction7.png}{Image}
+	\item {\tt SELECT ROUND(17.58,2) "ROUND exemple" FROM DUAL;} cette commande affiche l'arrondi supérieur du nombre 17.58 à 2 chiffres après la virgule. (cela affiche 17.58) \href{run:./Images/TP3/tp3_fonction8.png}{Image}
+	\item {\tt SELECT TRUNC(1958.0917,1) "TRUNC exemple" FROM DUAL;} cette commande affiche le nombre 1958.0917 à 1 chiffre après la virgule. (cela affiche 1958) \href{run:./Images/TP3/tp3_fonction9.png}{Image}
+	\item {\tt SELECT TRUNC(1958.0917,2) "TRUNC exemple" FROM DUAL;} cette commande affiche le nombre 1958.0917 à 2 chiffres après la virgule. (cela affiche 1958.09) \href{run:./Images/TP3/tp3_fonction10.png}{Image}
+	\item {\tt SELECT ROUND(TO\_DATE('SEP-17-2009'), 'YEAR') "New Year" FROM DUAL;} cette commande affiche le premier jour de l'année suivante si le nombre de jours restant pour l'année suivante est plus petit que le nombre de jours passés, affiche le premier jour de l'année précédente sinon. (exemple si on est le 01/02/2010 cela affiche 01/01/2010 or si on est le 01/12/2010 cela affiche 01/01/2011) \href{run:./Images/TP3/tp3_fonction11.png}{Image}
+	\item {\tt SELECT SYSDATE FROM DUAL;} cette commande affiche la date sous forme {\tt jours/mois/années} \href{run:./Images/TP3/tp3_fonction12.png}{Image}.
+	\item {\tt SELECT EXTRACT(YEAR FROM SYSDATE) FROM DUAL;} cette commande affiche l'année. \href{run:./Images/TP3/tp3_fonction13.png}{Image}
+	\item {\tt SELECT ADD\_MONTHS(SYSDATE,7) FROM DUAL;} cette commande affiche la date actuelle ou l'on a ajouté 7 mois. (exemple si on est le 01/01/2010, cela affiche 01/08/2010) \href{run:./Images/TP3/tp3_fonction14.png}{Image}
+	\item {\tt SELECT TRUNC(MONTHS\_BETWEEN(SYSDATE, TO\_DATE('JUN-19-2001'))) AS AGEBB FROM DUAL;} cette commande affiche le nombre de mois qu'il y a entre le 19/06/2001 et la date actuelle \href{run:./Images/TP3/tp3_fonction15.png}{Image}.
+	\item {\tt SELECT TO\_NUMBER(TO\_CHAR(SYSDATE, 'YYYY')) FROM DUAL;} cette commande commence par convertir l'année actuelle ({\tt DATE}) en chaîne de caractères ({\tt CHAR}) puis le convertis en un nombre ({\tt NUMBER}). (cela affiche 2018) \href{run:./Images/TP3/tp3_fonction16.png}{Image}
+\end{itemize}
+
+\paragraph{Remarque :}{\tt DUAL} est un objet permettant de faire {\tt SELECT ... FROM} sans avoir crée de table.
+
+\paragraph{2)}On change le format des dates en utilisant la commande {\tt ALTER SESSION SET NLS\_DATE\_FORMAT = ’DD-MM-YYYY’;} le format de date par défaut étant 'YYYY-MM-DD'. Un message nous indique que la session a été modifiée.
+
+\subsection{Exemple sur de vrai table}
+
+\paragraph{1)}Commençons par créer une table {\tt ETUDIANTS}.	
+
+\begin{lstlisting}
+CREATE TABLE ETUDIANTS(
+	NUMERO		NUMBER(4)	NOT NULL,
+	NOM		VARCHAR2(25)	NOT NULL,
+	PRENOM		VARCHAR2(25)	NOT NULL,
+	SEXE		CHAR(1)		CHECK (SEXE IN ('M','F')),
+	DATENAISSANCE	DATE		NOT NULL,
+	POIDS		NUMBER		,
+	ANNEE		NUMBER		,
+	CONSTRAINT PK_ETUDIANTS PRIMARY KEY (NUMERO)
+);
+\end{lstlisting}
+
+\paragraph{2)}Insérons des lignes.
+
+\begin{lstlisting}
+INSERT INTO ETUDIANTS VALUES(71,'Traifor','Benoît','M','10/12/1978',77,1);
+INSERT INTO ETUDIANTS VALUES(72,'Génial','Clément','M','10/04/1978',72,1);
+INSERT INTO ETUDIANTS VALUES(73,'Paris','Adam','M','28/06/1974',72,2);
+INSERT INTO ETUDIANTS (NUMERO,NOM,PRENOM,SEXE,DATENAISSANCE,POIDS) VALUES(74,'Parees','Clémence','F','20/09/1977',72);
+INSERT INTO ETUDIANTS VALUES(69,'Saitout','Inès','F','22/11/1969',69,2);
+INSERT INTO ETUDIANTS VALUES(55,'Seratoub','Izouaf','M','19/09/2013',81,1);
+\end{lstlisting}
+
+\paragraph{}Voici notre table.
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		\verb+NUMERO+ & \verb+NOM+ & \verb+PRENOM+ & \verb+SEXE+ & \verb+DATENAISSANCE+ & \verb+POIDS+ & \verb+ANNEE+ \\
+		\hline
+		71 & Traifor & Benoît & M & 10/12/1978 & 77 & 1 \\
+		\hline
+		72 & Génial & Clément & M & 10/04/1978 & 72 & 1 \\
+		\hline
+		73 & Paris & Adam & M & 28/06/1974 & 72 & 2 \\
+		\hline
+		74 & Parees & Clémence & F & 20/09/1977 & 72 & \\
+		\hline
+		69 & Saitout & Inès & F & 22/11/1969 & 69 & 2 \\
+		\hline
+		55 & Seratoub & Izouaf & M & 19/09/2013 & 81 & 1 \\
+		\hline
+	\end{tabular}
+	\caption{Etudiants}
+\end{table}
+
+\paragraph{3)}Nous allons tester plusieurs requêtes
+\begin{itemize}
+	\item Cette requête affiche dans une colonne que l'on nomme {\tt ANETUDE} {\tt Première} si {\tt ANNEE = 1}, {\tt Seconde} si {\tt ANNEE = 2}, {\tt Valeur différente de 1 et de 2 !!} si {\tt ANNEE != 1 OR ANNEE != 2} \href{run:./Images/TP3/tp3_1.png}{Image}.
+	\begin{lstlisting}
+SELECT DECODE(ANNEE,1,'Première',2,'Seconde','Valeur différente de 1 et de 2 !!') AS ANETUDE FROM ETUDIANTS;
+	\end{lstlisting}
+	\item Cette requête affiche le nom de tous les étudiants en majuscule. \href{run:./Images/TP3/tp3_2.png}{Image}.
+	\begin{lstlisting}
+SELECT UPPER(NOM) FROM ETUDIANTS;
+	\end{lstlisting}
+	\item Cette requête affiche le nom de tous les étudiants en minuscule. \href{run:./Images/TP3/tp3_3.png}{Image}.
+	\begin{lstlisting}
+SELECT LOWER(NOM) FROM ETUDIANTS;
+	\end{lstlisting}
+	\item {\tt SELECT NVL(ANNEE,'Valeur NON renseignée') AS AN\_ETUDE FROM ETUDIANTS;} cette commande affiche une erreur "ORA-01722: Nombre non valide".
+\end{itemize}
+
+\paragraph{}La fonction {\tt NVL} nous affiche une erreur car {\tt ANNEE} est un nombre alors que 'Valeur NON renseignée' est une chaîne de caractères, or cette fonction met chaque valeur {\tt ANNEE} de la table ayant {\tt NULL} comme valeur par 'Valeur NON renseignée'. On essaye donc ici de mettre une chaîne de caractères dans un nombre. \href{run:./Images/TP3/tp3_4.png}{Image}.
+\begin{lstlisting}
+SELECT NVL(TO_CHAR(ANNEE), 'Valeur NON renseignée') AS ANETUDE FROM ETUDIANTS;
+\end{lstlisting}
+
+\paragraph{4)}Gestion de l'affichage. On utilise les commandes ci-dessous (ne fonctionne pas sur \url{https://apex.oracle.com}):
+\begin{lstlisting}
+COL attribut FORMAT format
+TITLE 'Un titre'
+SET PAGES n
+SET LINES m
+\end{lstlisting}
+
+\paragraph{5)}Nous souhaitons interroger notre BD.
+\begin{enumerate}
+	\item Affiche le nom et prénom dans une seul colonne \href{run:./Images/TP3/tp3_5.png}{Image}.
+	\begin{lstlisting}
+SELECT NOM||' '||PRENOM AS NOM_PRENOM FROM ETUDIANTS;
+	\end{lstlisting}
+	\item Affiche la première lettre du prénom en majuscule suivit d'un '. ' puis le nom en majuscule dans une seul colonne \href{run:./Images/TP3/tp3_6.png}{Image}.
+	\begin{lstlisting}
+SELECT UPPER(SUBSTR(PRENOM,1,1))||'. '||UPPER(NOM) AS PN FROM ETUDIANTS WHERE SEXE = 'M';
+	\end{lstlisting}
+	\item Affiche le nom et la date de naissance des étudiants dont le nom se prononce 'Paris' \href{run:./Images/TP3/tp3_7.png}{Image}.
+	\begin{lstlisting}
+SELECT NOM,DATENAISSANCE FROM ETUDIANTS WHERE SOUNDEX(NOM) = SOUNDEX('Paris');	
+	\end{lstlisting}
+	\item Affiche le nom et la date de naissance des étudiants ayant un prénom qui commence par la lettre 'I' \href{run:./Images/TP3/tp3_8.png}{Image}.
+	\begin{lstlisting}
+SELECT NOM,DATENAISSANCE FROM ETUDIANTS WHERE PRENOM LIKE 'I%';	
+	\end{lstlisting}
+	\item Affiche une description de l'étudiant. (affiche le nom, prénom, son sexe, sa date de naissance, son poids et son année) \href{run:./Images/TP3/tp3_9.png}{Image}.
+	\begin{lstlisting}
+SELECT UPPER(NOM)||' '||PRENOM||' est '||DECODE(SEXE, 'M', 'un garçon', 'F', 'une fille')||' né le '||DATENAISSANCE||' pèse '||POIDS||' kg et est en '||DECODE(ANNEE, 1, 'Première année', 2, 'Seconde années') AS DESCRIPTION FROM ETUDIANTS WHERE ANNEE BETWEEN 1 AND 2;	
+	\end{lstlisting}
+	\item Affiche l'âge de l'étudiant \href{run:./Images/TP3/tp3_10.png}{Image}.
+	\begin{lstlisting}
+SELECT UPPER(NOM)||' à '||TO_CHAR(EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATENAISSANCE)) || ' ans' AS AGE FROM ETUDIANTS;	
+	\end{lstlisting}
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TP4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{TP4}
+
+\section{SQL Simple, Tri et regroupements}
+
+\subsection{Table employés}
+
+\paragraph{1)}Voici une table représentant des employés.
+
+\begin{lstlisting}
+CREATE TABLE EMPLOYE(
+	NUM_EMP		NUMBER(4)		,
+	NOM_EMP		VARCHAR(25)		CONSTRAINT NN_NOM_EMP NOT NULL,
+	DATE_EMB	DATE			CONSTRAINT NN_DATE_EMB NOT NULL,
+	DATE_SORTIE	DATE			,
+	CONSTRAINT PK_EMPLOYE PRIMARY KEY (NUM_EMP)
+);
+\end{lstlisting}
+
+\paragraph{}On va insérer des lignes dans notre table.
+
+\begin{lstlisting}
+INSERT INTO EMPLOYE (NUM_EMP,NOM_EMP,DATE_EMB) VALUES(9007,'CHEVALIER','01/01/1996');
+INSERT INTO EMPLOYE (NUM_EMP,NOM_EMP,DATE_EMB) VALUES(9701,'LEROY','17/09/1997');
+INSERT INTO EMPLOYE (NUM_EMP,NOM_EMP,DATE_EMB) VALUES(9703,'LAMI','17/09/1997');
+INSERT INTO EMPLOYE (NUM_EMP,NOM_EMP,DATE_EMB) VALUES(9801,'SULTAN','20/03/1998');
+INSERT INTO EMPLOYE (NUM_EMP,NOM_EMP,DATE_EMB) VALUES(9802,'CLEMENCE','16/10/1998');
+INSERT INTO EMPLOYE (NUM_EMP,NOM_EMP,DATE_EMB) VALUES(9803,'CAVALIER','22/11/1998');
+INSERT INTO EMPLOYE (NUM_EMP,NOM_EMP,DATE_EMB) VALUES(9901,'ALEXANDRE','21/02/1999');
+\end{lstlisting}
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		\verb+NUM_EMP+ & \verb+NOM_EMP+ & \verb+DATE_EMB+ & \verb+DATE_SORTIE+ \\
+		\hline
+		9007 & CHEVALIER & 01/01/1969 & \\
+		\hline
+		9701 & LEROY & 17/09/1997 & \\
+		\hline
+		9703 & LAMI & 17/09/1997 & \\
+		\hline
+		9801 & SULTAN & 20/03/1998 & \\
+		\hline
+		9802 & CLÉMENCE & 16/10/1998 & \\
+		\hline
+		9803 & CAVALIER & 22/11/1998 & \\
+		\hline
+		9901 & ALEXANDRE & 21/02/1999 & \\
+		\hline
+	\end{tabular}
+	\caption{Employé}
+\end{table}
+
+\paragraph{2)}On va essayer de les afficher.
+\begin{enumerate}
+	\item Affiche tous les employés \href{run:./Images/TP4/tp4_1.png}{Image}.
+	\begin{lstlisting}
+SELECT * FROM EMPLOYE;
+	\end{lstlisting}
+	\item Affiche le nom de tous les employés \href{run:./Images/TP4/tp4_2.png}{Image}.
+	\begin{lstlisting}
+SELECT NOM_EMP AS NOM FROM EMPLOYE;
+	\end{lstlisting}
+	\item Affiche le nom des employés embauchés à partir du 1\up{er} janvier 1999 \href{run:./Images/TP4/tp4_3.png}{Image}.
+	\begin{lstlisting}
+SELECT NOM_EMP AS NOM FROM EMPLOYE WHERE DATE_EMB >= '01/01/1999';
+	\end{lstlisting}
+	\item Affiche le numéro et le nom des employés qui ont leurs nom qui commence par la lettre 'C' \href{run:./Images/TP4/tp4_4.png}{Image}.
+	\begin{lstlisting}
+SELECT NUM_EMP,NOM_EMP AS NOM FROM EMPLOYE WHERE NOM_EMP LIKE 'C%';
+	\end{lstlisting}
+	\item Affiche le nom des employés triés par ordre décroissant sur les noms \href{run:./Images/TP4/tp4_5.png}{Image}.
+	\begin{lstlisting}
+SELECT NOM_EMP AS NOM FROM EMPLOYE ORDER BY NOM_EMP DESC;
+	\end{lstlisting}
+	\item Affiche le nombre d'employés embauchés chaque année \href{run:./Images/TP4/tp4_6.png}{Image}.
+	\begin{lstlisting}
+SELECT COUNT(DATE_EMB) AS NB_EMPLOYE,EXTRACT(YEAR FROM DATE_EMB) AS ANNEE FROM EMPLOYE GROUP BY EXTRACT(YEAR FROM DATE_EMB);
+	\end{lstlisting}
+	\item Affiche le nombre d'employés embauchés chaque année ayant un nom de plus de 5 lettres \href{run:./Images/TP4/tp4_7.png}{Image}.
+	\begin{lstlisting}
+SELECT COUNT(DATE_EMB) AS NB_EMPLOYE,EXTRACT(YEAR FROM DATE_EMB) AS ANNEE FROM EMPLOYE WHERE LENGTH(NOM_EMP) > 5 GROUP BY EXTRACT(YEAR FROM DATE_EMB);
+	\end{lstlisting}
+	\item Affiche le nombre d'employés embauchés chaque année ayant un nom commençant par un 'L' ou 'C' en ne gardant que les années avec au moins deux employés \href{run:./Images/TP4/tp4_8.png}{Image}.
+	\begin{lstlisting}
+SELECT COUNT(EXTRACT(YEAR FROM DATE_EMB)) AS NB_EMPLOYE,EXTRACT(YEAR FROM DATE_EMB) AS ANNEE FROM EMPLOYE WHERE (NOM_EMP LIKE 'L%' OR NOM_EMP LIKE 'C%') GROUP BY EXTRACT(YEAR FROM DATE_EMB) HAVING COUNT(EXTRACT(YEAR FROM DATE_EMB)) >= 2;
+	\end{lstlisting}
+\end{enumerate}
+
+
+
+\section{Table postes}
+
+\paragraph{1)}Nous allons recréer une nouvelle table employé.
+
+\begin{lstlisting}
+CREATE TABLE EMPLOYE(
+	NumEmp		NUMBER(4)		,
+	Poste		VARCHAR2(25)		CONSTRAINT NN_Poste NOT NULL,
+	Salaire		NUMBER			CONSTRAINT CK_Salaire CHECK(Salaire >= 0),
+	NumServ		VARCHAR2(2)		CONSTRAINT NN_NumServ NOT NULL,
+	DateDeb		DATE			CONSTRAINT NN_DateDeb NOT NULL,
+	DateFin		DATE			,
+	CONSTRAINT PK_EMPLOYE PRIMARY KEY (NumEmp)
+);
+\end{lstlisting}
+
+\paragraph{}On insert les lignes suivantes :
+
+\begin{lstlisting}
+INSERT INTO EMPLOYE (NumEmp,Poste,Salaire,NumServ,DateDeb) VALUES(9701,'PRESIDENT',5800,'S2','17/09/1997');
+INSERT INTO EMPLOYE (NumEmp,Poste,Salaire,NumServ,DateDeb,DateFin) VALUES(9703,'SECRETAIRE',950,'S1','17/09/1997','31/12/1998');
+INSERT INTO EMPLOYE (NumEmp,Poste,Salaire,NumServ,DateDeb) VALUES(9703,'SECRETAIRE',1200,'S1','01/01/1999');
+INSERT INTO EMPLOYE (NumEmp,Poste,Salaire,NumServ,DateDeb,DateFin) VALUES(9801,'DIRECTEUR',5300,'S1','07/07/1997','31/12/1998');
+INSERT INTO EMPLOYE (NumEmp,Poste,Salaire,NumServ,DateDeb) VALUES(9801,'DIRECTEUR',3200,'S5','20/03/1998');
+INSERT INTO EMPLOYE (NumEmp,Poste,Salaire,NumServ,DateDeb) VALUES(9802,'DIRECTEUR',3500,'S2','16/10/1998');
+INSERT INTO EMPLOYE (NumEmp,Poste,Salaire,NumServ,DateDeb) VALUES(9803,'INGENIEUR',2600,'S4','22/11/1998');
+INSERT INTO EMPLOYE (NumEmp,Poste,Salaire,NumServ,DateDeb) VALUES(9901,'DIRECTEUR',3000,'S3','21/02/1999');
+\end{lstlisting}
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|c|c|c|c|}
+		\hline
+		\verb+NumEmp+ & \verb+Poste+ & \verb+Salaire+ & \verb+NumServ+ & \verb+DateDeb+ & \verb+DateFin+ \\
+		\hline
+		9701 & PRESIDENT & 5800 & S2 & 17/09/1997 & \\
+		\hline
+		9703 & SECRETAIRE & 950 & S1 & 17/09/1997 & 31/12/1998 \\
+		\hline
+		9703 & SECRETAIRE & 1200 & S1 & 01/01/1999 & \\
+		\hline
+		9801 & DIRECTEUR & 5300 & S1 & 07/07/1997 & 31/12/1998 \\
+		\hline
+		9801 & DIRECTEUR & 3200 & S5 & 20/03/1998 & \\
+		\hline
+		9802 & DIRECTEUR & 3500 & S2 & 16/10/1998 & \\
+		\hline
+		9803 & INGENIEUR & 2600 & S4 & 22/11/1998 & \\
+		\hline
+		9901 & DIRECTEUR & 3000 & S3 & 21/02/1999 & \\
+		\hline
+	\end{tabular}
+	\caption{Employé}
+\end{table}
+
+\paragraph{2)}On va essayer de les afficher.
+\begin{enumerate}
+	\item Affiche les noms des postes (sans doublons) \href{run:./Images/TP4/tp4_9.png}{Image}.
+	\begin{lstlisting}
+SELECT DISTINCT Poste FROM EMPLOYE;
+	\end{lstlisting} 
+	\item Affiche les postes occupés dont le salaire de l'employé est supérieur ou égal à 3000 \href{run:./Images/TP4/tp4_10.png}{Image}.
+	\begin{lstlisting}
+SELECT Poste,Salaire FROM EMPLOYE WHERE Salaire >= 3000;
+	\end{lstlisting}
+	\item Affiche les postes occupés, triés par ordre décroissant et salaire par ordre croissant \href{run:./Images/TP4/tp4_11.png}{Image}.
+	\begin{lstlisting}
+SELECT Poste,Salaire FROM EMPLOYE WHERE Salaire >= 3000 ORDER BY Salaire DESC;
+	\end{lstlisting}
+	\item Affiche le salaire le plus bas \href{run:./Images/TP4/tp4_12.png}{Image}.
+	\begin{lstlisting}
+SELECT MIN(Salaire) AS SALAIRE_MIN FROM EMPLOYE;
+	\end{lstlisting}
+	\item Affiche la moyenne des salaires \href{run:./Images/TP4/tp4_13.png}{Image}.
+	\begin{lstlisting}
+SELECT AVG(Salaire) AS Moyenne_Salaire FROM EMPLOYE;
+	\end{lstlisting}
+	\item Affiche la moyenne des salaires par postes \href{run:./Images/TP4/tp4_14.png}{Image}.
+	\begin{lstlisting}
+SELECT AVG(Salaire) AS Moyenne_Salaire,Poste FROM EMPLOYE GROUP BY Poste;
+	\end{lstlisting}
+	\item Affiche le nombre de salariés avec un salaire > 3000 \href{run:./Images/TP4/tp4_15.png}{Image}.
+	\begin{lstlisting}
+SELECT COUNT(Salaire) AS Nombre_Salaire_Sup_3000 FROM EMPLOYE WHERE Salaire > 3000;
+	\end{lstlisting}
+	\item Affiche la moyenne des salaires actuels pour chaque service \href{run:./Images/TP4/tp4_16.png}{Image}.
+	\begin{lstlisting}
+SELECT AVG(Salaire) AS Moyenne_Salaire, NumServ FROM EMPLOYE GROUP BY NumServ;
+	\end{lstlisting}
+	\item Affiche la moyenne des salaires pour chaque poste avec au moins 2 employés \href{run:./Images/TP4/tp4_17.png}{Image}.
+	\begin{lstlisting}
+SELECT AVG(Salaire) AS Moyenne_Salaire, Poste FROM EMPLOYE GROUP BY Poste HAVING COUNT(Poste) >= 2;
+	\end{lstlisting}
+\end{enumerate}
+
+\subsection{Table Etudiants}
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		\verb+NUMERO+ & \verb+NOM+ & \verb+PRENOM+ & \verb+SEXE+ & \verb+DATENAISSANCE+ & \verb+POIDS+ & \verb+ANNEE+ \\
+		\hline
+		71 & Traifor & Benoît & M & 10/12/1978 & 77 & 1 \\
+		\hline
+		72 & Génial & Clément & M & 10/04/1978 & 72 & 1 \\
+		\hline
+		73 & Paris & Adam & M & 28/06/1974 & 72 & 2 \\
+		\hline
+		74 & Parees & Clémence & F & 20/09/1977 & 72 & \\
+		\hline
+		69 & Saitout & Inès & F & 22/11/1969 & 69 & 2 \\
+		\hline
+		55 & Seratoub & Izouaf & M & 19/09/2013 & 81 & 1 \\
+		\hline
+	\end{tabular}
+	\caption{Etudiants}
+\end{table}
+
+\paragraph{}Considérons notre table ci-dessous notre table étudiants.
+
+\begin{enumerate}
+	\item Affiche la moyenne des poids par sexe \href{run:./Images/TP4/tp4_18.png}{Image}.
+	\begin{lstlisting}
+SELECT AVG(POIDS) AS MOYENNE_POIDS,SEXE FROM ETUDIANTS GROUP BY SEXE;
+	\end{lstlisting}
+	\item Affiche la moyenne des poids par sexe et par tranche d'âge \href{run:./Images/TP4/tp4_19.png}{Image}.
+	\begin{lstlisting}
+SELECT AVG(POIDS)AS MOYENNE_POIDS,EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATENAISSANCE) AS AGE,SEXE FROM ETUDIANTS GROUP BY SEXE,EXTRACT(YEAR FROM DATENAISSANCE);	
+	\end{lstlisting}
+	\item Affiche la moyenne des poids par année, par sexe et par tranche d'âge \href{run:./Images/TP4/tp4_20.png}{Image}.
+	\begin{lstlisting}
+SELECT AVG(POIDS) AS MOYENNE_POIDS,ANNEE,SEXE,EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATENAISSANCE) AS AGE FROM ETUDIANTS GROUP BY ANNEE,SEXE,EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATENAISSANCE);
+	\end{lstlisting}
+	\item Affiche la moyenne des poids par sexe, par année et par tranche d'âge \href{run:./Images/TP4/tp4_21.png}{Image}.
+	\begin{lstlisting}
+SELECT AVG(POIDS) AS MOYENNE_POIDS,SEXE,ANNEE,EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATENAISSANCE) AS AGE FROM ETUDIANTS GROUP BY SEXE,ANNEE,EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATENAISSANCE);
+	\end{lstlisting}
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TP5 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+\chapter{TP5}
+
+\section{SQL : Jointures}
+
+\subsection{Gestion d'un café}
+
+\paragraph{1)}Liste des fichiers :
+
+\begin{itemize}
+	\item \href{./TP5/creatcafe.sql}{creatcafe.sql}
+	\item \href{./TP5/insertcafe.sql}{insertcafe.sql}
+	\item \href{./TP5/requetes_tp5.sql}{requetes\_tp5.sql}
+\end{itemize}
+
+\paragraph{}Voici les contenus de nos tables (résultat de la requête 1) :
+\begin{itemize}
+	\item La table {\tt LESTABLES} \href{run:./Images/TP5/lestables.png}{Image}
+	\item La table {\tt SERVEUR} \href{run:./Images/TP5/serveur.png}{Image}
+	\item La table {\tt CONSOMMATION} \href{run:./Images/TP5/consommation.png}{Image}
+	\item La table {\tt FACTURE} \href{run:./Images/TP5/facture.png}{Image}
+	\item La table {\tt COMPREND} \href{run:./Images/TP5/comprend.png}{Image}
+\end{itemize}
+
+\paragraph{}La liste des commandes, les numéros de lignes correspondent avec le numéros des requêtes de l'annexe A \autoref{AnnexeA}
+
+\begin{lstlisting}[firstnumber=2]
+SELECT NBPLACE FROM LESTABLES WHERE NUMTABLE = 4;
+SELECT NUMCONS,LIBCONS,PRIXCONS FROM CONSOMMATION WHERE PRIXCONS > 1;
+SELECT NUMSERVEUR,NOMSERVEUR,VILLESERVEUR FROM SERVEUR WHERE VILLESERVEUR = 'BELFORT' OR VILLESERVEUR = 'DELLE';
+SELECT NUMFACTURE,NUMTABLE FROM FACTURE WHERE NUMSERVEUR = 52 AND DATEFACTURE = '02/02/2010';
+SELECT NUMCONS,QTE FROM COMPREND WHERE NUMFACTURE = 1203;
+SELECT DISTINCT NUMCONS FROM COMPREND WHERE NUMFACTURE = 1200 OR NUMFACTURE = 1201;
+SELECT NOMSERVEUR,DATENSERVEUR FROM SERVEUR WHERE EXTRACT(YEAR FROM DATENSERVEUR) = '1976';
+SELECT NUMCONS,LIBCONS,PRIXCONS FROM CONSOMMATION WHERE LIBCONS LIKE 'Biere%';
+SELECT * FROM FACTURE WHERE DATEFACTURE > '01/02/2010';
+SELECT NOMSERVEUR FROM SERVEUR WHERE NOMSERVEUR LIKE '_i%';
+SELECT NOMSERVEUR FROM SERVEUR WHERE NOMSERVEUR LIKE 'P%';
+SELECT NOMSERVEUR FROM SERVEUR ORDER BY VILLESERVEUR;
+SELECT LIBCONS,NUMCONS,PRIXCONS FROM CONSOMMATION ORDER BY LIBCONS;
+SELECT DISTINCT VILLESERVEUR FROM SERVEUR;
+SELECT COUNT(*) AS NOMBRE_TABLES FROM LESTABLES;
+SELECT SUM(NBPLACE) AS NOMBRE_PLACES FROM LESTABLES;
+SELECT NUMSERVEUR,COUNT(*) AS NB_FACTURE FROM FACTURE GROUP BY NUMSERVEUR;
+SELECT DATEFACTURE,COUNT(*) AS NB_FACTURE FROM FACTURE GROUP BY DATEFACTURE;
+SELECT NUMSERVEUR,COUNT(*) AS NB_FACTURE FROM FACTURE GROUP BY NUMSERVEUR HAVING COUNT(NUMSERVEUR) > 3;
+SELECT AVG(PRIXCONS) AS MOYENNE_PRIX FROM CONSOMMATION;
+SELECT AVG(PRIXCONS) AS MOYENNE_PRIX FROM CONSOMMATION WHERE LIBCONS LIKE 'Cafe%';
+SELECT NUMCONS,AVG(QTE) AS QTE_MOYENNE FROM COMPREND GROUP BY NUMCONS;
+SELECT VILLESERVEUR,COUNT(*) AS NOMBRE_SERVEUR FROM SERVEUR GROUP BY VILLESERVEUR;
+SELECT VILLESERVEUR,COUNT(*) AS NOMBRE_SERVEUR FROM SERVEUR GROUP BY VILLESERVEUR HAVING COUNT(VILLESERVEUR) > 1;
+SELECT NUMFACTURE,COUNT(*) AS NOMBRES_CONSOMMATIONS FROM COMPREND GROUP BY NUMFACTURE;
+SELECT NUMFACTURE,SUM(QTE) AS NOMBRES_CONSOMMATIONS FROM COMPREND GROUP BY NUMFACTURE;
+SELECT NUMCONS,COUNT(*) AS NB_FACTURE FROM COMPREND GROUP BY NUMCONS;
+SELECT NUMCONS,COUNT(*) AS NB_FACTURE FROM COMPREND GROUP BY NUMCONS HAVING COUNT(*) > 2;
+SELECT * FROM SERVEUR ORDER BY VILLESERVEUR,NOMSERVEUR;
+SELECT * FROM SERVEUR ORDER BY VILLESERVEUR DESC,NOMSERVEUR;
+SELECT NUMFACTURE,NUMTABLE,NOMSERVEUR FROM (FACTURE JOIN SERVEUR USING(NUMSERVEUR));
+SELECT NUMFACTURE,NOMSERVEUR FROM (FACTURE JOIN SERVEUR USING(NUMSERVEUR)) WHERE NUMTABLE = 5;
+SELECT NUMFACTURE,NOMTABLE,NOMSERVEUR FROM ((FACTURE JOIN LESTABLES USING(NUMTABLE)) JOIN SERVEUR USING(NUMSERVEUR));
+SELECT DISTINCT NOMSERVEUR,NOMTABLE FROM ((FACTURE JOIN LESTABLES USING(NUMTABLE)) JOIN SERVEUR USING(NUMSERVEUR)) ORDER BY NOMSERVEUR;
+SELECT NUMCONS,LIBCONS,PRIXCONS,QTE FROM (COMPREND JOIN CONSOMMATION USING(NUMCONS)) WHERE NUMFACTURE = 1203;
+SELECT NUMCONS,LIBCONS,PRIXCONS,QTE FROM (((FACTURE JOIN LESTABLES USING(NUMTABLE)) JOIN COMPREND USING(NUMFACTURE)) JOIN CONSOMMATION USING (NUMCONS)) WHERE DATEFACTURE = '01/02/2010' AND NUMTABLE = 5;
+SELECT NOMTABLE,NUMFACTURE FROM (LESTABLES LEFT JOIN FACTURE USING(NUMTABLE));
+SELECT NOMTABLE,NUMFACTURE FROM (FACTURE RIGHT JOIN LESTABLES USING(NUMTABLE));
+SELECT NUMTABLE,NOMTABLE FROM (LESTABLES LEFT JOIN FACTURE USING(NUMTABLE)) WHERE NUMFACTURE IS NULL;
+SELECT NUMCONS,LIBCONS FROM (((SELECT NUMSERVEUR,NUMFACTURE FROM FACTURE JOIN SERVEUR USING(NUMSERVEUR)) JOIN COMPREND USING(NUMFACTURE)) LEFT JOIN CONSOMMATION USING(NUMCONS)) WHERE NUMSERVEUR = 52;
+SELECT DISTINCT NUMCONS,LIBCONS FROM CONSOMMATION MINUS (SELECT NUMCONS,LIBCONS FROM (COMPREND JOIN CONSOMMATION USING(NUMCONS)));
+SELECT NUMFACTURE,DATEFACTURE,SUM(QTE) AS NB_CONS FROM (COMPREND JOIN FACTURE USING(NUMFACTURE)) GROUP BY NUMFACTURE,DATEFACTURE;
+SELECT NUMFACTURE,SUM(PRIXCONS*QTE) AS PRIX_TOTAL FROM (COMPREND JOIN CONSOMMATION USING(NUMCONS)) GROUP BY NUMFACTURE;
+SELECT DATEFACTURE,SUM(QTE) AS NB_CONS FROM (COMPREND JOIN FACTURE USING(NUMFACTURE)) GROUP BY DATEFACTURE;
+SELECT DATEFACTURE,SUM(PRIXCONS*QTE) AS CA FROM ((COMPREND JOIN CONSOMMATION USING(NUMCONS)) LEFT JOIN FACTURE USING(NUMFACTURE)) GROUP BY DATEFACTURE;
+SELECT NOMSERVEUR,COUNT(*) AS NB_FACTURES FROM (FACTURE LEFT JOIN SERVEUR USING(NUMSERVEUR)) GROUP BY NOMSERVEUR;
+SELECT NOMSERVEUR,COUNT(*) AS NB_FACTURES FROM ((COMPREND JOIN FACTURE USING(NUMFACTURE)) RIGHT JOIN SERVEUR USING(NUMSERVEUR)) GROUP BY NOMSERVEUR;
+SELECT NOMSERVEUR,SUM(PRIXCONS*QTE) AS CA FROM (((COMPREND JOIN FACTURE USING(NUMFACTURE)) JOIN SERVEUR USING(NUMSERVEUR)) JOIN CONSOMMATION USING(NUMCONS)) GROUP BY NOMSERVEUR;
+SELECT NOMTABLE,COUNT(*) AS NB_FACTURES FROM (FACTURE JOIN LESTABLES USING(NUMTABLE)) GROUP BY NOMTABLE;
+SELECT LIBCONS,COUNT(*) AS NB_FACTURES FROM ((COMPREND JOIN FACTURE USING(NUMFACTURE)) JOIN CONSOMMATION USING(NUMCONS)) GROUP BY LIBCONS;
+SELECT NOMTABLE,SUM(PRIXCONS*QTE) FROM (((COMPREND JOIN FACTURE USING(NUMFACTURE)) JOIN LESTABLES USING(NUMTABLE)) JOIN CONSOMMATION USING(NUMCONS)) GROUP BY NOMTABLE;
+\end{lstlisting}
+
+\paragraph{}Voici les résultats de ces commandes :
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\href{run:./Images/TP5/tp5_2.png}{Requête 2} & \href{run:./Images/TP5/tp5_19.png}{Requête 19} & \href{run:./Images/TP5/tp5_36.png}{Requête 36} \\
+		\hline
+		\href{run:./Images/TP5/tp5_3.png}{Requête 3} & \href{run:./Images/TP5/tp5_20.png}{Requête 20} & \href{run:./Images/TP5/tp5_37.png}{Requête 37} \\
+		\hline
+		\href{run:./Images/TP5/tp5_4.png}{Requête 4} & \href{run:./Images/TP5/tp5_21.png}{Requête 21} & \href{run:./Images/TP5/tp5_38.png}{Requête 38} \\
+		\hline
+		\href{run:./Images/TP5/tp5_5.png}{Requête 5} & \href{run:./Images/TP5/tp5_22.png}{Requête 22} & \href{run:./Images/TP5/tp5_39.png}{Requête 39} \\
+		\hline
+		\href{run:./Images/TP5/tp5_6.png}{Requête 6} & \href{run:./Images/TP5/tp5_23.png}{Requête 23} & \href{run:./Images/TP5/tp5_40.png}{Requête 40} \\
+		\hline
+		\href{run:./Images/TP5/tp5_7.png}{Requête 7} & \href{run:./Images/TP5/tp5_24.png}{Requête 24} & \href{run:./Images/TP5/tp5_41.png}{Requête 41} \\
+		\hline
+		\href{run:./Images/TP5/tp5_8.png}{Requête 8} & \href{run:./Images/TP5/tp5_25.png}{Requête 25} & \href{run:./Images/TP5/tp5_42.png}{Requête 42} \\
+		\hline
+		\href{run:./Images/TP5/tp5_9.png}{Requête 9} & \href{run:./Images/TP5/tp5_26.png}{Requête 26} & \href{run:./Images/TP5/tp5_43.png}{Requête 43} \\
+		\hline
+		\href{run:./Images/TP5/tp5_10.png}{Requête 10} & \href{run:./Images/TP5/tp5_27.png}{Requête 27} & \href{run:./Images/TP5/tp5_44.png}{Requête 44} \\
+		\hline
+		\href{run:./Images/TP5/tp5_11.png}{Requête 11} & \href{run:./Images/TP5/tp5_28.png}{Requête 28} & \href{run:./Images/TP5/tp5_45.png}{Requête 45} \\
+		\hline
+		\href{run:./Images/TP5/tp5_12.png}{Requête 12} & \href{run:./Images/TP5/tp5_29.png}{Requête 29} & \href{run:./Images/TP5/tp5_46.png}{Requête 46} \\
+		\hline
+		\href{run:./Images/TP5/tp5_13.png}{Requête 13} & \href{run:./Images/TP5/tp5_30.png}{Requête 30} & \href{run:./Images/TP5/tp5_47.png}{Requête 47} \\
+		\hline
+		\href{run:./Images/TP5/tp5_14.png}{Requête 14} & \href{run:./Images/TP5/tp5_31.png}{Requête 31} & \href{run:./Images/TP5/tp5_48.png}{Requête 48} \\
+		\hline
+		\href{run:./Images/TP5/tp5_15.png}{Requête 15} & \href{run:./Images/TP5/tp5_32.png}{Requête 32} & \href{run:./Images/TP5/tp5_49.png}{Requête 49} \\
+		\hline
+		\href{run:./Images/TP5/tp5_16.png}{Requête 16} & \href{run:./Images/TP5/tp5_33.png}{Requête 33} & \href{run:./Images/TP5/tp5_50.png}{Requête 50} \\
+		\hline
+		\href{run:./Images/TP5/tp5_17.png}{Requête 17} & \href{run:./Images/TP5/tp5_34.png}{Requête 34} & \href{run:./Images/TP5/tp5_51.png}{Requête 51} \\
+		\hline
+		\href{run:./Images/TP5/tp5_18.png}{Requête 18} & \href{run:./Images/TP5/tp5_35.png}{Requête 35} & \href{run:./Images/TP5/tp5_52.png}{Requête 52} \\
+		\hline
+	\end{tabular}
+	\caption{Images requêtes TP5}
+\end{table}
+
+\subsection{Généalogie royale}
+
+\paragraph{1)}Fichier \href{./TP5/genealogie.sql}{genealogie.sql}
+
+\begin{lstlisting}
+CREATE TABLE genealogie (
+  numPer 		NUMERIC,
+  Nom 			varchar2(35) NOT NULL,
+  DateNaissance 	date NOT NULL,
+  Pere 			NUMERIC DEFAULT NULL,
+  Mere 			NUMERIC DEFAULT NULL,
+  PRIMARY KEY (numPer)
+);
+\end{lstlisting}
+
+\paragraph{2)}Soit la table suivante :
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|c|c|c|}
+		\hline
+		\verb+numPer+ & \verb+Nom+ & \verb+DateNaissance+ & \verb+Pere+ & \verb+Mere+ \\
+		\hline
+		1 & George VI & 1895-12-14 & & \\
+		\hline
+		2 & Elizabeth Bowes-Lyon & 1900-08-04 & & \\
+		\hline
+		3 & Elizabeth II & 1926-04-21 & 1 & 2 \\
+		\hline
+		4 & Margaret du Royaume-Uni & 1921-06-10 & 1 & 2 \\
+		\hline
+		5 & Philip Mountbatten & 1921-06-10 & & \\
+		\hline
+		6 & Prince Charles & 1948-11-14 & 5 & 3 \\
+		\hline
+		7 & Princesse Anne & 1950-08-15 & 5 & 3 \\
+		\hline
+		8 & Prince Andrew & 1960-02-19 & 5 & 3 \\
+		\hline
+		9 & Prince Edward & 1964-03-10 & 5 & 3 \\
+		\hline
+		10 & Diana Spencer & 1961-07-01 & & \\ 
+		\hline
+		11 & Prince William & 1982-06-21 & 6 & 10 \\
+		\hline
+		12 & Prince Henry & 1984-09-15 & 6 & 10 \\
+		\hline
+	\end{tabular}
+	\caption{Généalogie}
+\end{table}
+
+\paragraph{}Voici quelques requêtes
+
+\begin{enumerate}
+	\item Affiche le nom et la date de naissance des enfants d'Élizabeth II. \href{run:./Images/TP5/gen1.png}{Image}
+	\begin{lstlisting}
+SELECT Nom,DateNaissance FROM GENEALOGIE WHERE Mere = 3;
+	\end{lstlisting}
+	\item Affiche la mère du Prince William. \href{run:./Images/TP5/gen2.png}{Image}
+	\begin{lstlisting}
+SELECT G2.NOM,G2.DATENAISSANCE FROM GENEALOGIE G1, GENEALOGIE G2 WHERE G1.NUMPER = 11 AND G2.NUMPER = G1.MERE;
+	\end{lstlisting}
+	\item Affiche les parents d'Élizabeth II. \href{run:./Images/TP5/gen3.png}{Image}
+	\begin{lstlisting}
+SELECT G2.NOM,G2.DATENAISSANCE FROM GENEALOGIE G1, GENEALOGIE G2 WHERE (G1.NUMPER = 3 AND G2.NUMPER = G1.MERE) OR (G1.NUMPER = 3 AND G2.NUMPER = G1.PERE);
+	\end{lstlisting}
+	\item Affiche les frères et soeurs du Prince Charles. \href{run:./Images/TP5/gen4.png}{Image}
+	\begin{lstlisting}
+SELECT G2.NOM,G2.DATENAISSANCE FROM GENEALOGIE G1, GENEALOGIE G2 WHERE (G1.NUMPER = 6 AND G2.MERE = G1.MERE AND G2.PERE = G1.PERE AND G2.NUMPER != 6);
+	\end{lstlisting}
+	\item Affiche le nom du père, le nom de la mère et le nom de l'individu. (affiche {\tt NULL} si {\tt Pere} où {\tt Mere} = {\tt NULL}) \href{run:./Images/TP5/gen5.png}{Image}
+	\begin{lstlisting}
+SELECT G1.NOM,G2.NOM AS NOM_PERE,G3.NOM AS NOM_MERE FROM GENEALOGIE G1,GENEALOGIE G2,GENEALOGIE G3 WHERE (G2.NUMPER = G1.PERE AND G3.NUMPER = G1.MERE) UNION (SELECT NOM,NULL,NULL FROM GENEALOGIE WHERE PERE IS NULL OR MERE IS NULL);
+	\end{lstlisting}
+	G1 le nom de la personne, G2 le nom de la mère et G3 le nom du père. La requête à gauche de {\tt UNION} affiche toutes les personnes ainsi que les noms de leurs parents. La requête à droite de {\tt UNION} affiche toutes les personnes qui n'ont pas de parents, et l'union des deux sous-requêtes affiche toutes les personnes ainsi que leurs parents (ou {\tt NULL} si pas de parents).
+	\item Affiche le nom de  l'individu et le nombre d'enfents de cet individu. On affiche seulement si l'individu possède au moins un enfant. \href{run:./Images/TP5/gen6.png}{Image}
+	\begin{lstlisting}
+SELECT G1.NOM,COUNT(*) AS NB_ENFANTS FROM GENEALOGIE G1,GENEALOGIE G2 WHERE G1.NUMPER = G2.PERE OR G1.NUMPER = G2.MERE GROUP BY G1.NOM;
+	\end{lstlisting}
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TP6 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{TP6}
+
+\section{SQL : Requêtes avancées}
+
+\paragraph{}Liste des requêtes de l'annexe B \autoref{AnnexeB}
+
+\paragraph{}Voici les fichiers utilisés :
+\begin{itemize}
+	\item \href{./TP6/ecole_tp6.sql}{ecole\_tp6.sql}
+	\item \href{./TP6/requetes_tp6.sql}{requetes\_tp6.sql}
+\end{itemize}
+
+\paragraph{}Voici les contenus de nos tables :
+\begin{itemize}
+	\item La table {\tt ELEVES} \href{run:./Images/TP6/eleves.png}{Image}
+	\item La table {\tt PROFESSEURS} \href{run:./Images/TP6/professeurs.png}{Image}
+	\item La table {\tt COURS} \href{run:./Images/TP6/cours.png}{Image}
+	\item La table {\tt CHARGE} \href{run:./Images/TP6/charge.png}{Image}
+	\item La table {\tt RESULTATS} \href{run:./Images/TP6/resultats.png}{Image}
+	\item La table {\tt ACTIVITES} \href{run:./Images/TP6/activites.png}{Image}
+	\item La table {\tt ACTIVITES\_PRATIQUEES} \href{run:./Images/TP6/activites_pratiquees.png}{Image}
+\end{itemize}
+
+
+
+\paragraph{}Voici la liste des commandes :
+
+\begin{lstlisting}
+SELECT NOM,PRENOM,DATE_NAISSANCE FROM ELEVES;
+SELECT * FROM ACTIVITES;
+SELECT SPECIALITE FROM PROFESSEURS;
+SELECT NOM,PRENOM FROM ELEVES WHERE POIDS < 45 AND ANNEE BETWEEN 1 AND 2;
+SELECT NOM FROM ELEVES WHERE POIDS BETWEEN 60 AND 80;
+SELECT NOM FROM PROFESSEURS WHERE SPECIALITE = 'poésie' OR SPECIALITE = 'sql';
+SELECT NOM FROM ELEVES WHERE NOM LIKE 'L%';
+SELECT NOM FROM PROFESSEURS WHERE SPECIALITE IS NULL;
+SELECT NOM,PRENOM FROM ELEVES WHERE POIDS < 45 AND ANNEE = 1;
+SELECT NOM,DECODE(SPECIALITE,NULL,'****',SPECIALITE) AS SPECIALITE FROM PROFESSEURS;
+/* 11 */
+SELECT E.NOM,E.PRENOM FROM (ELEVES E JOIN ACTIVITES_PRATIQUEES A USING(Num_eleve)) WHERE (NIVEAU = 1 AND A.NOM = 'Surf');
+SELECT E.NOM,E.PRENOM FROM ((SELECT * FROM ACTIVITES_PRATIQUEES WHERE NIVEAU = 1 AND NOM = 'Surf') JOIN ELEVES E USING(NUM_ELEVE));
+SELECT E.NOM,E.PRENOM FROM ((SELECT * FROM ACTIVITES_PRATIQUEES WHERE NIVEAU IN (1) AND NOM IN ('Surf')) JOIN ELEVES E USING(NUM_ELEVE));
+SELECT E.NOM,E.PRENOM FROM (((SELECT * FROM ACTIVITES_PRATIQUEES) MINUS (SELECT * FROM ACTIVITES_PRATIQUEES WHERE NIVEAU != 1 OR NOM != 'Surf')) JOIN ELEVES E USING(NUM_ELEVE));
+SELECT E.NOM,E.PRENOM FROM (((SELECT * FROM ACTIVITES_PRATIQUEES) INTERSECT (SELECT * FROM ACTIVITES_PRATIQUEES WHERE NIVEAU IN (1) AND NOM IN ('Surf'))) JOIN ELEVES E USING(NUM_ELEVE));
+/* 12 */
+SELECT E.NOM FROM ((ACTIVITES_PRATIQUEES AP JOIN ACTIVITES A USING(Niveau,Nom)) JOIN ELEVES E USING(Num_eleve)) WHERE EQUIPE = 'Amc Indus';
+SELECT E.NOM FROM ((SELECT * FROM ACTIVITES A WHERE EQUIPE IN ('Amc Indus')) JOIN ACTIVITES_PRATIQUEES AP USING(NOM,NIVEAU)) JOIN ELEVES E USING(NUM_ELEVE);
+/* 13 */
+SELECT P1.NOM,P2.NOM FROM PROFESSEURS P1, PROFESSEURS P2 WHERE (P1.SPECIALITE = P2.SPECIALITE AND P1.NUM_PROF != P2.NUM_PROF);
+/* 14 */
+SELECT NOM,SALAIRE_ACTUEL,SALAIRE_ACTUEL-SALAIRE_BASE AS AUGMENTATION FROM PROFESSEURS WHERE SPECIALITE = 'sql';
+SELECT NOM,SALAIRE_ACTUEL,SALAIRE_ACTUEL-SALAIRE_BASE AS AUGMENTATION FROM PROFESSEURS WHERE SPECIALITE IN ('sql');
+/* 15 */
+SELECT NOM FROM PROFESSEURS WHERE SALAIRE_ACTUEL-SALAIRE_BASE > 0.25*SALAIRE_BASE;
+SELECT NOM FROM PROFESSEURS WHERE SALAIRE_ACTUEL-SALAIRE_BASE != 0 AND SALAIRE_ACTUEL-SALAIRE_BASE BETWEEN 0 AND 0.25*SALAIRE_BASE;
+/* 16 */
+SELECT 4*POINTS AS POINTS_SUR_100 FROM (RESULTATS JOIN ELEVES USING(NUM_ELEVE)) WHERE NUM_ELEVE = 5;
+SELECT 4*R.POINTS AS POINTS_SUR_100 FROM ((SELECT * FROM RESULTATS) MINUS (SELECT * FROM RESULTATS WHERE NUM_ELEVE != 5)) R;
+/* 17 */
+SELECT AVG(POIDS) AS POIDS_MOYEN_AN1 FROM ELEVES WHERE ANNEE = 1;
+SELECT AVG(POIDS) AS POIDS_MOYEN_AN1 FROM ((SELECT * FROM ELEVES) MINUS (SELECT * FROM ELEVES WHERE ANNEE != 1));
+/* 18 */
+SELECT SUM(POINTS) AS POINT_TOTAL FROM RESULTATS WHERE NUM_ELEVE = 3;
+SELECT SUM(POINTS) AS POINT_TOTAL FROM ((SELECT * FROM RESULTATS) INTERSECT (SELECT * FROM RESULTATS WHERE NUM_ELEVE = 3));
+/* 19 */
+SELECT MIN(POINTS) AS MINIMUN, MAX(POINTS) AS MAXIMUM FROM RESULTATS WHERE NUM_ELEVE = 1;
+SELECT MIN(POINTS) AS MINIMUN, MAX(POINTS) AS MAXIMUM FROM RESULTATS WHERE NUM_ELEVE IN (1);
+/* 20 */
+SELECT COUNT(*) AS NB_ELEVES_AN2 FROM ELEVES GROUP BY ANNEE HAVING ANNEE = 2;
+SELECT COUNT(*) AS NB_ELEVES_AN2 FROM ELEVES WHERE ANNEE = 2;
+/* 21 */
+SELECT AVG(SALAIRE_ACTUEL-SALAIRE_BASE) AS MOYENNE_AUGMENTATION FROM PROFESSEURS WHERE SPECIALITE = 'sql';
+SELECT AVG(SALAIRE_ACTUEL-SALAIRE_BASE) AS MOYENNE_AUGMENTATION FROM PROFESSEURS WHERE SPECIALITE IN ('sql');
+/* 22 */
+SELECT EXTRACT(YEAR FROM Der_prom) AS ANNEE_DER_PROM FROM PROFESSEURS WHERE NUM_PROF = 8;
+/* 23 */
+SELECT Date_entree,Der_prom,EXTRACT(YEAR FROM Der_prom)-EXTRACT(YEAR FROM Date_entree) AS ANNEE_PASSEE FROM PROFESSEURS;
+/* 24 */
+SELECT AVG(EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM date_naissance)) AS AGE_MOYEN FROM ELEVES;
+/* 25 */
+SELECT NOM FROM PROFESSEURS WHERE ADD_MONTHS(Date_entree,50) < Der_prom;
+/* 26 */
+SELECT NOM FROM ELEVES WHERE EXTRACT(YEAR FROM ADD_MONTHS(SYSDATE,4)) - EXTRACT(YEAR FROM date_naissance) > 24;
+/* 27 */
+SELECT * FROM ELEVES ORDER BY ANNEE,NOM;
+/* 28 */
+SELECT 4*POINTS AS POINTS_SUR_100 FROM RESULTATS WHERE NUM_ELEVE = 5 ORDER BY 4*POINTS DESC;
+SELECT 4*POINTS AS POINTS_SUR_100 FROM ((SELECT * FROM RESULTATS) MINUS (SELECT * FROM RESULTATS WHERE NUM_ELEVE != 5)) ORDER BY 4*POINTS DESC;
+/* 29 */
+SELECT NOM,AVG(POINTS) AS MOYENNE FROM (RESULTATS JOIN ELEVES USING(NUM_ELEVE)) WHERE ANNEE = 1 GROUP BY NOM;
+/* 30 */
+SELECT NUM_ELEVE,AVG(POINTS) AS MOYENNE FROM (RESULTATS JOIN ELEVES USING(NUM_ELEVE)) WHERE ANNEE = 1 GROUP BY NUM_ELEVE HAVING SUM(POINTS) > 40;
+/* 31 */
+SELECT MAX(POINT_TOTAL) AS MAXIMUM FROM (SELECT SUM(POINTS) AS POINT_TOTAL FROM (RESULTATS JOIN ELEVES USING(NUM_ELEVE)) GROUP BY NUM_ELEVE);
+/* 32 */
+SELECT E.NOM FROM ((ACTIVITES_PRATIQUEES AP JOIN ACTIVITES USING(NIVEAU,NOM)) JOIN ELEVES E USING(NUM_ELEVE)) WHERE EQUIPE = 'Amc Indus';
+/* 33 */
+SELECT AVG(POINTS) AS MOYENNE FROM (RESULTATS JOIN ELEVES USING(NUM_ELEVE)) WHERE ANNEE = 1 GROUP BY NUM_ELEVE HAVING AVG(POINTS) > (SELECT AVG(POINTS) AS MOYENNE FROM (RESULTATS JOIN ELEVES USING(NUM_ELEVE)) GROUP BY ANNEE HAVING ANNEE = 1);
+/* 34 */
+SELECT E1.NOM,E1.POIDS FROM ELEVES E1 WHERE ANNEE = 1 GROUP BY NOM,POIDS HAVING E1.POIDS > (SELECT MAX(POIDS) FROM ELEVES E2 WHERE ANNEE = 2);
+SELECT E1.NOM,E1.POIDS FROM ELEVES E1 WHERE ANNEE = 1 AND NOT EXISTS (SELECT E2.NOM,E2.POIDS FROM ELEVES E2 WHERE E1.POIDS < E2.POIDS) GROUP BY NOM,POIDS;
+/* 35 */
+SELECT E1.NOM,E1.POIDS FROM ELEVES E1 WHERE ANNEE = 1 GROUP BY NOM,POIDS HAVING E1.POIDS > (SELECT MIN(POIDS) FROM ELEVES E2 WHERE ANNEE = 2);
+SELECT E1.NOM,E1.POIDS FROM ELEVES E1 WHERE ANNEE = 1 AND E1.POIDS > ANY (SELECT E2.POIDS FROM ELEVES E2 WHERE ANNEE = 2);
+/* 36 */
+SELECT NOM,POIDS,ANNEE FROM ELEVES E1 WHERE E1.POIDS > (SELECT AVG(POIDS) FROM ELEVES E2 WHERE E2.ANNEE = E1.ANNEE);
+/* 37 */
+SELECT NOM FROM ((SELECT * FROM (PROFESSEURS JOIN CHARGE USING(NUM_PROF))) MINUS (SELECT * FROM (PROFESSEURS JOIN CHARGE USING(NUM_PROF)) WHERE NUM_COURS != 1));
+/* 38 */
+SELECT DISTINCT NOM FROM ELEVES NATURAL JOIN RESULTATS NATURAL JOIN (SELECT NUM_ELEVE FROM ACTIVITES_PRATIQUEES AP WHERE AP.NOM = 'Tennis') NATURAL JOIN (SELECT NUM_ELEVE FROM RESULTATS GROUP BY NUM_ELEVE HAVING AVG(POINTS) > 0.6*20) WHERE ANNEE = 1;
+/* 39 */
+SELECT DISTINCT NUM_PROF,NOM FROM PROFESSEURS P WHERE
+    (SELECT COUNT(*) FROM (CHARGE C1 JOIN COURS C2 USING(NUM_COURS)) WHERE NUM_PROF = P.NUM_PROF AND ANNEE = 2)
+    =
+    (SELECT COUNT(*) FROM COURS WHERE ANNEE = 2)
+;
+/* 40 */
+SELECT NUM_ELEVE,NOM FROM ELEVES E WHERE
+    (SELECT COUNT(DISTINCT NOM) FROM (ACTIVITES_PRATIQUEES AP JOIN ACTIVITES A USING(NIVEAU,NOM)) WHERE AP.NUM_ELEVE = E.NUM_ELEVE)
+    =
+    (SELECT COUNT(DISTINCT NOM) FROM ACTIVITES)
+;
+\end{lstlisting}
+
+\paragraph{}Voici les résultats de ces commandes :
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		\href{run:./Images/TP6/tp6_1.png}{Requête 1} & \href{run:./Images/TP6/tp6_11.png}{Requête 11} & \href{run:./Images/TP6/tp6_21.png}{Requête 21} & \href{run:./Images/TP6/tp6_31.png}{Requête 31} \\ 
+		\hline
+		\href{run:./Images/TP6/activites.png}{Requête 2} & \href{run:./Images/TP6/tp6_12.png}{Requête 12} & \href{run:./Images/TP6/tp6_22.png}{Requête 22} & \href{run:./Images/TP6/tp6_32.png}{Requête 32} \\ 
+		\hline
+		\href{run:./Images/TP6/tp6_3.png}{Requête 3} & \href{run:./Images/TP6/tp6_13.png}{Requête 13} & \href{run:./Images/TP6/tp6_23.png}{Requête 23} & \href{run:./Images/TP6/tp6_33.png}{Requête 33} \\ 
+		\hline
+		\href{run:./Images/TP6/tp6_4.png}{Requête 4} & \href{run:./Images/TP6/tp6_14.png}{Requête 14} & \href{run:./Images/TP6/tp6_24.png}{Requête 24} & \href{run:./Images/TP6/tp6_34.png}{Requête 34} \\ 
+		\hline
+		\href{run:./Images/TP6/tp6_5.png}{Requête 5} & \href{run:./Images/TP6/tp6_15.png}{Requête 15} & \href{run:./Images/TP6/tp6_25.png}{Requête 25} & \href{run:./Images/TP6/tp6_35.png}{Requête 35} \\ 
+		\hline
+		\href{run:./Images/TP6/tp6_6.png}{Requête 6} & \href{run:./Images/TP6/tp6_16.png}{Requête 16} & \href{run:./Images/TP6/tp6_26.png}{Requête 26} & \href{run:./Images/TP6/tp6_36.png}{Requête 36} \\ 
+		\hline
+		\href{run:./Images/TP6/tp6_7.png}{Requête 7} & \href{run:./Images/TP6/tp6_17.png}{Requête 17} & \href{run:./Images/TP6/tp6_27.png}{Requête 27} & \href{run:./Images/TP6/tp6_37.png}{Requête 37} \\ 
+		\hline
+		\href{run:./Images/TP6/tp6_8.png}{Requête 8} & \href{run:./Images/TP6/tp6_18.png}{Requête 18} & \href{run:./Images/TP6/tp6_28.png}{Requête 28} & \href{run:./Images/TP6/tp6_38.png}{Requête 38} \\ 
+		\hline
+		\href{run:./Images/TP6/tp6_9.png}{Requête 9} & \href{run:./Images/TP6/tp6_19.png}{Requête 19} & \href{run:./Images/TP6/tp6_29.png}{Requête 29} & \href{run:./Images/TP6/tp6_39.png}{Requête 39} \\ 
+		\hline
+		\href{run:./Images/TP6/tp6_10.png}{Requête 10} & \href{run:./Images/TP6/tp6_20.png}{Requête 20} & \href{run:./Images/TP6/tp6_30.png}{Requête 30} & \href{run:./Images/TP6/tp6_40.png}{Requête 40} \\ 
+		\hline
+	\end{tabular}
+	\caption{Images requêtes TP6}
+\end{table}
+
+\paragraph{Note :}Certaines requêtes possèdent plusieurs implémentations possibles, si c'est le cas le screenshot de la requête en question et le screenshot de la première implémentation de cette requête (les screenshots affichent le même résultat).
+
+Voici quelques explications sur les requêtes difficiles:
+\begin{itemize}
+	\item[\bf{34)}] On cherche les élèves de première année qui sont plus lourds que n'importe quels élèves de deuxièmes années. C'est-à-dire un élève de première année qui est plus lourd que le plus lourd des élèves de deuxièmes années. Or aucun élève de première année est plus lourd que le plus lourd de deuxièmes années. S'il est plus lourd que le plus lourd des élèves de deuxièmes années, alors il est plus lourd que n'importe quels élèves de deuxièmes années.
+	\item[\bf{35)}] On cherche les élèves de première année qui sont plus lourds qu'un élève quelconque de deuxièmes années. C'es-t-à-dire un élève de première année qui est plus lourd que le moins lourd des élèves de deuxièmes années. S'il est plus lourd que le moins lourd des élèves de deuxièmes années, alors il est plus lourd qu'un élève quelconque de deuxièmes années.
+	\item[\bf{36)}] On regarde si l'élève à un poids supérieur aux moyennes des poids de leurs années respectif. On teste donc la moyenne des poids avec une sous-requête qui renvoie la moyenne des poids des élèves de la même année que l'élè-ve concerné.
+	\item[\bf{37)}] On choisit tous les professeurs et on enlève tous les professeurs qui donnent le cours numéro 1 (même s'ils ont d'autres cours que le cours numéro 1).
+	\item[\bf{38)}] On choisit que les élèves qui pratiquent le tennis, puis on choisit parmi les élèves restants, les élèves qui ont une note de plus de 60\%, et on ne garde que les élèves qui sont en première année.
+	\item[\bf{39)}] Il s'agit d'une division. La première sous-requête affiche le nombre de cours de deuxièmes années que chaque professeur donne, la deuxième sous-requête affiche le nombre total de cours de deuxièmes années. On affiche donc tous les professeurs qui donnent le nombre de cours de deuxièmes années égale au nombre total de cours de deux-ièmes années.
+	\item[\bf{40)}] Il s'agit d'une division. La première sous-requête affiche le nombre d'activités que pratiquent chaque élève, la deuxième sous-requête affiche le nombre total d'activités. On affiche donc tous les élèves qui pratiquent le nombre d'activités égale au nombre d'activité totale.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TP7 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{TP7}
+
+\section{SQL : Vues et Arbres}
+
+\paragraph{1)}Ficher \href{./TP7/famille.sql}{famille.sql}
+
+\begin{table}[H]
+	\center
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		\verb+NUMERO+ & \verb+NOM+ & \verb+PRENOM+ & \verb+DATENAISSANCE+ & \verb+SEXE+ & \verb+PERE+ & \verb+MERE+ \\
+		\hline
+		99 & LEBON & NICOLAS & 01/01/1895 & M & & \\
+		\hline
+		88 & HONNEUR & CLEMENCE & 01/01/1900 & F & & \\
+		\hline
+		1 & LEBON & MICHEL & 08/04/1920 & M & 99 & 88 \\
+		\hline
+		15 & LEBON & GABRIEL & 08/04/1936 & M & 99 & 88 \\
+		\hline
+		98 & CLEMENT & JEAN-BAPTISTE & 01/01/1890 & M & & \\
+		\hline
+		87 & GABRIEL & EVE & 01/01/1892 & F & &  \\
+		\hline
+		2 & CLEMENT & EVE & 11/13/1928 & F & 98 & 87 \\
+		\hline
+		22 & CLEMENT & JEAN-BAPTISTE & 11/13/1910 & F & 98 & \\
+		\hline
+		3 & LEBON & NICOLAS & 09/17/1958 & M & 1 & 2 \\
+		\hline
+		33 & LEBON & ROSE & 06/16/1951 & F & 1 & 2 \\
+		\hline
+		34 & CLEMENT & RAOUL & 01/01/1941 & M & 22 & \\
+		\hline
+		55 & CLEMENT & MARIE & 08/13/1978 & F & 33 & 34 \\
+		\hline
+		56 & MEDECIN & LINA & 02/22/2002 & F & 55 & \\
+		\hline
+		77 & PARIS & LOUIS & 03/20/1924 & M & & \\
+		\hline
+		78 & GATEAU & EVELYNE & 03/20/1936 & F & & \\
+		\hline
+		4 & PARIS & INES & 11/22/1969 & F & 77 & 78 \\
+		\hline
+		76 & PARIS & AMELIA & 10/20/1958 & F & 77 & 78 \\
+		\hline
+		75 & AMMAR & SERGES & 10/20/1987 & M & & 76 \\
+		\hline
+		5 & LEBON & CLEMENCE & 06/19/2001 & F & 3 & 4 \\
+		\hline
+		6 & LEBON & ADAM & 06/19/2001 & M & 3 & 4 \\
+		\hline
+		7 & LEBON & FRANCOIS & 02/22/1954 & M & 1 & 2 \\
+		\hline
+		9 & LEBON & FRANCOISE & 09/01/1963 & F & 15 &  \\
+		\hline
+		8 & LEBON & MICHEL & 09/05/1987 & M & 7 & 9 \\
+		\hline
+		10 & LEBON & AIME & 05/24/1993 & M & 7 & 9 \\
+		\hline
+		11 & LEBON & ALEXANDRE & 07/16/1994 & M & 7 & 9 \\
+		\hline
+	\end{tabular}
+	\caption{Personnes}
+\end{table}
+
+\paragraph{2)}Le schémas E/A de la table : \href{run:./Images/TP7/schemas.png}{Image}
+
+\paragraph{Remarque : }La commande {\tt \&num} ne fonctionnant pas sur \url{https://apex.oracle.com}, on choisit donc dans la requête une personne.
+
+\paragraph{3)}Créer une vue permettant d'afficher les ancêtres d'une personne avec la commande {\tt CONNECT BY}. Le numéro de la personne doit être demandé au moment où la requête se lance ({\tt \&num}). On choisit la personne numéro 7. \href{run:./Images/TP7/tp7_3.png}{Image}
+
+\begin{lstlisting}
+DROP VIEW TEST;
+CREATE VIEW TEST(NUMERO,NOM,PRENOM,PERE,MERE) AS (
+    SELECT NUMERO,NOM,PRENOM,PERE,MERE FROM PERSONNES WHERE NUMERO != 7
+        START WITH NUMERO = 7
+        CONNECT BY NUMERO = PRIOR MERE OR NUMERO = PRIOR PERE)
+;
+SELECT * FROM TEST;
+\end{lstlisting}
+
+\paragraph{4)}Affichez le père, le grand-père et l'arrière-grand-père d'une personne {\tt \&num} en n'utilisant pas {\tt CONNECT BY} mais en utilisant plusieurs vues intermédiaires. On choisit la personne numéro 10. \href{run:./Images/TP7/tp7_4.png}{Image}
+
+\begin{lstlisting}
+DROP VIEW PERE;
+DROP VIEW GRAND_PERE;
+DROP VIEW ARRIERE_GRAND_PERE;
+CREATE VIEW PERE(PERE) AS (SELECT PERE FROM PERSONNES P WHERE P.NUMERO = 10);
+CREATE VIEW GRAND_PERE(PERE) AS (SELECT PERE FROM PERSONNES P WHERE P.NUMERO IN (SELECT PERE FROM PERE));
+CREATE VIEW ARRIERE_GRAND_PERE(PERE) AS (SELECT PERE FROM PERSONNES P WHERE P.NUMERO IN (SELECT PERE FROM GRAND_PERE));
+SELECT * FROM PERE;
+SELECT * FROM GRAND_PERE;
+SELECT * FROM ARRIERE_GRAND_PERE;
+SELECT * FROM PERSONNES WHERE NUMERO IN (SELECT PERE FROM PERE) OR NUMERO IN (SELECT PERE FROM GRAND_PERE) OR NUMERO IN (SELECT PERE FROM ARRIERE_GRAND_PERE);
+\end{lstlisting}
+
+On a utilisé 3 vues intermédiaires :
+\begin{itemize}
+	\item La vue {\tt PERE} qui renvoie le numéro du père de la personne 10. \href{run:./Images/TP7/tp7_vue1.png}{Image}
+	\item La vue {\tt GRAND\_PERE} qui renvoie le numéro du grand-père de la personne 10. \href{run:./Images/TP7/tp7_vue2.png}{Image}
+	\item La vue {\tt ARRIERE\_GRAND\_PERE} qui renvoie le numéro de l'arrière-grand-père de la personne 10. \href{run:./Images/TP7/tp7_vue3.png}{Image}
+\end{itemize}
+
+Puis on affiche les personnes qui ont leurs numéros qui sont dans les vues {\tt PERE}, {\tt GRAND\_PERE} et {\tt ARRIERE\_GRAND\_PERE}.
+
+\paragraph{5)}Affiche tous les descendants d'une personne. On affiche le numéro, le nom, le prénom ainsi que l'arborescence. On choisit la personne numéro 98. \href{run:./Images/TP7/tp7_5.png}{Image}
+
+\begin{lstlisting}
+SELECT NUMERO,NOM,PRENOM FROM PERSONNES WHERE NUMERO != 98
+START WITH NUMERO = 98
+CONNECT BY PRIOR NUMERO = MERE OR PRIOR NUMERO = PERE;
+\end{lstlisting}
+
+\paragraph{6)}Affiche les frères et soeurs d'une personne. On choisit la personne numéro 8. \href{run:./Images/TP7/tp7_6.png}{Image}
+
+\begin{lstlisting}
+SELECT P2.NUMERO,P2.NOM,P2.PRENOM,P1.MERE,P1.PERE FROM PERSONNES P1,PERSONNES P2 WHERE P1.NUMERO = 8 AND P1.MERE = P2.MERE AND P1.PERE = P2.PERE AND P1.NUMERO != P2.NUMERO;
+\end{lstlisting}
+
+Il suffit de regarder quels sont les personnes qui ont le même père et la même mère que la personne 8.
+
+\paragraph{7)}Affiche seulement les soeurs d'une personne. On choisit la personne numéro 7. \href{run:./Images/TP7/tp7_7.png}{Image}
+
+\begin{lstlisting}
+SELECT P2.NUMERO,P2.NOM,P2.PRENOM,P1.MERE,P1.PERE FROM PERSONNES P1,PERSONNES P2 WHERE P1.NUMERO = 7 AND P1.MERE = P2.MERE AND P1.PERE = P2.PERE AND P1.NUMERO != P2.NUMERO AND P2.SEXE = 'F';
+\end{lstlisting}
+
+Il suffit de regarder quels sont les personnes qui ont le même père et la même mère que la personne 8 et qui ont {\tt SEXE = 'F'}.
+
+\paragraph{8)}Affiche tous les enfants des femmes de plus de 40 ans. On commence par créer une vue contenant que les femmes de 40 ans, puis on affiche tous les personnes qui ont pour mère une valeur contenant dans la vue. \href{run:./Images/TP7/tp7_8.png}{Image}
+
+\begin{lstlisting}
+CREATE VIEW TEST(NUMERO,PERE,MERE) AS (SELECT NUMERO,PERE,MERE FROM PERSONNES WHERE SEXE = 'F' AND EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATENAISSANCE) > 40);
+SELECT * FROM PERSONNES P WHERE P.MERE IN (SELECT NUMERO FROM TEST);
+\end{lstlisting}
+
+On a crée une vue {\tt TEST} qui renvoie toutes les femmes qui ont plus de 40 ans. Puis on affiche les personnes qui ont leurs mères qui sont dans la vue {\tt TEST}. \href{run:./Images/TP7/tp7_vue4.png}{Image}
+
+\paragraph{9)}Affichez les cousins et cousines d'une personne. On choisit la personne numéro 8. \href{run:./Images/TP7/tp7_9.png}{Image}
+
+\begin{lstlisting}
+DROP VIEW PARENTS;
+DROP VIEW ONCLES_TANTES;
+CREATE VIEW PARENTS(NUMERO,PERE,MERE) AS (SELECT P2.NUMERO,P2.PERE,P2.MERE FROM PERSONNES P1,PERSONNES P2 WHERE (P1.NUMERO = 8 AND P1.NUMERO != P2.NUMERO) AND (P1.PERE = P2.NUMERO OR P1.MERE = P2.NUMERO));
+CREATE VIEW ONCLES_TANTES(NUMERO) AS (SELECT NUMERO FROM PERSONNES P WHERE (P.MERE IN (SELECT MERE FROM PARENTS) OR P.PERE IN (SELECT PERE FROM PARENTS)) AND P.NUMERO NOT IN (SELECT NUMERO FROM PARENTS));
+SELECT * FROM PARENTS;
+SELECT * FROM ONCLES_TANTES;
+SELECT * FROM PERSONNES P WHERE P.PERE IN (SELECT NUMERO FROM ONCLES_TANTES) OR P.MERE IN (SELECT NUMERO FROM ONCLES_TANTES);
+\end{lstlisting}
+
+On a crée 2 vues intermédiaires :
+\begin{itemize}
+	\item La vue {\tt PARENTS} qui renvoie le père et la mère de la personne 8. \href{run:./Images/TP7/tp7_vue5.png}{Image}
+	\item La vue {\tt ONCLES\_TANTES} qui renvoie les oncles et les tantes de la personne 8.\href{run:./Images/TP7/tp7_vue6.png}{Image}
+\end{itemize}
+
+Puis on affiche les personnes qui ont leur mère ou père qui sont dans la vue {\tt ONCLES\_TANTES}.
+
+\paragraph{10)}Affichez les cousins issus de germain d'une personne.
+
+\paragraph{11)}Affichez les petits enfants de la personne la plus âgée ayant des petits enfants. \href{run:./Images/TP7/tp7_11.png}{Image}
+
+\begin{lstlisting}
+DROP VIEW MAX_AGE;
+DROP VIEW ENFANTS;
+CREATE VIEW MAX_AGE(NUMERO) AS (SELECT NUMERO FROM PERSONNES WHERE DATENAISSANCE = (SELECT MIN(DATENAISSANCE) FROM PERSONNES));
+CREATE VIEW ENFANTS(NUMERO) AS (SELECT NUMERO FROM PERSONNES P WHERE P.PERE IN (SELECT NUMERO FROM MAX_AGE) OR P.MERE IN (SELECT NUMERO FROM MAX_AGE));
+SELECT * FROM MAX_AGE;
+SELECT * FROM ENFANTS;
+SELECT NUMERO FROM PERSONNES P WHERE P.PERE IN (SELECT NUMERO FROM ENFANTS) OR P.MERE IN (SELECT NUMERO FROM ENFANTS);
+\end{lstlisting}
+
+On a créer 2 vues intermédiaires :
+\begin{itemize}
+	\item La vue {\tt MAX\_AGE} qui renvoie le numéro de la personne la plus âgée dans la table. \href{run:./Images/TP7/tp7_vue7.png}{Image}
+	\item La vue {\tt ENFANTS} qui renvoie les enfants de la personne la plus âgée. \href{run:./Images/TP7/tp7_vue8.png}{Image}
+\end{itemize}
+
+Puis on affiche tous les personnes qui ont leur père ou mère dans la vue {\tt ENFANTS} (les petits-enfants).
+
+\paragraph{12)}Pour chaque personne, affichez les noms, prénom et âge de son descendant le plus jeune.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ANNEXES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix
+
+\chapter{Requêtes TP5}
+\label{AnnexeA}
+
+\begin{enumerate}
+	\item Liste du contenu de chaque table de la base.
+	\item Nombre de places de la table numéro 4 (Nbplace).
+	\item Liste des consommations dont le prix unitaire est supérieur à 1 euro (Numcons, Libcons, Prixcons).
+	\item Liste des serveurs de Belfort et de Delle (Numserveur, Nomserveur, Villeserveur).
+	\item Liste des factures du 2 février servies par le serveur 52 (Numfacture, Numtable).
+	\item Liste des consommations de la facture 1203 (Numcons, Qte).
+	\item Liste des consommations des factures 1200 et 1201 (sans lignes en double) (Numcons).
+	\item Liste des serveurs qui sont nés en 1976 (Nomserveur, Dateserveur).
+	\item Liste des consommations de type bière (Numcons, Libcons, Prixcons).
+	\item Liste des tables servies après le 1\up{er} février.
+	\item Liste des serveurs dont le nom contient i en deuxième position (Nomserveur).
+	\item Liste des serveurs dont le nom commence par un P (Nomserveur).
+	\item Liste des serveurs par ville (Nomserveur, Villeserveur).
+	\item Liste des consommations classées par ordre alphabétique sur le libellé (Libcons, Numcons, Prixcons).
+	\item Liste des villes où habitent les serveurs (sans lignes en double) (Villeserveur).
+	\item Le nombre de tables du restaurant.
+	\item Le nombre de places disponibles sur l'ensemble des tables.
+	\item Nombre de factures établies par chaque serveur (Numserveur, Nbfacture).
+	\item Nombre de factures établies chaque jour (Datefacture, Nbfacture).
+	\item Liste des serveurs qui ont établi plus de 3 factures (Numserveur, Nbfacture).
+	\item Prix moyen des consommations (Prixmoyen).
+	\item Prix moyen du café (Prixmoyen).
+	\item Quantité moyenne consommé pour chaque consommation (Numcons, Qtemoyenne).
+	\item Nombre de serveur par ville (Villeserveur, Nbserveur).
+	\item Liste des villes dans lesquelles habitent plus d'un serveur (Villeserveur, Nbserveur).
+	\item Nombre de types de consommations par factures (Numfacture, Nbcons).
+	\item Nombre total de consommations (en comptant la quantité) par facture (Numfacture, Qtecons).
+	\item Nombre de factures par consommation (Numcons, Nbfacture).
+	\item Consommations qui interviennent dans plus de 2 factures (Numcons, Nbfactures).
+	\item Liste des serveurs, triés par nom de ville croissante, puis le nom de serveur croissant.
+	\item Liste des serveurs triés par nom de ville décroissante, puis nom de serveur croissant.
+	\item Liste des factures avec leur numéro de table et le nom du serveur (Numfacture, Numtable, Nomserveur).
+	\item Liste des factures de la table 5 avec le nom du serveur (Numfacture, Nomserveur).
+	\item Liste des factures avec leur nom de table et le nom du serveur (Numfacture, Nomtable, Nomserveur).
+	\item Liste des serveurs et des tables qu'ils ont servies ordonnés selon le nom du serveur (pas de ligne double) (Nomserveur, Nomtable).
+	\item Liste des consommations de la facture 1203 avec leur nom, leur prix et leur quantité (Numcons, Libcons, Prixcons, Qte).
+	\item Liste des consommations du premier février de la table 5 avec leur nom, leur prix et leur quantité (Numcons, Libcons, Prixcons, Qte).
+	\item Liste des tables et des numéros de factures qui leur sont associées. Attention, on veut voir toutes les tables même si elles n'ont pas de factures. La table de départ (celle du \verb+FROM+) sera \verb+LESTABLES+ (Nomtable, Numfacture).
+	\item Même question que précédemment, mais avec \verb+FACTURE+ comme table de départ.
+	\item Liste des tables qui n'ont eu aucune facture (Numtable, Nomtable).
+	\item Liste des consommations qui ont déjà été servies par le serveur 52 (Numcons, Libcons).
+	\item Liste des consommations qui n'ont jamais été servis (Numcons, Libcons).
+	\item La liste des factures avec leur date et leur nombre de consommations (prendre en compte la quantité) (Numfacture, Datefacture, Nbcons).
+	\item La liste des factures et le montant de leur addition (Numfacture, Prixfacture).
+	\item Nombre de consommations servies par jour (Datefacture, Nbcons).
+	\item Montant global du chiffre d'affaires par jour (Datefacture, ca).
+	\item La liste des serveurs par nom et leur nombre de factures. Attention, les serveurs n'ayant fait aucune facture doi-vent apparaître dans le résultat (Nomserveur, Nbfactures).
+	\item La liste des serveurs par nom et le nombre de consommations qu'ils ont servies (Nomserveur, Nbcons).
+	\item La liste des serveurs par nom et leur chiffre d'affaire (somme des additions encaissées) (Nomserveur, ca).
+	\item Le nom des tables qui ont eu au moins deux factures (Nomtable, Nbfactures).
+	\item La liste complète des consommations et le nombre de factures dans lesquels elles apparaissent (Libcons, Nbfactures).
+	\item La liste complète des tables et leur chiffre d'affaires (Nomtable, ca).
+\end{enumerate}
+
+\chapter{Requêtes TP6}
+\label{AnnexeB}
+
+\begin{enumerate}
+	\item Donner la liste des noms, des prénoms et des dates de naissance de tous les élèves.
+	\item Donner tous les renseignements sur toutes les activités.
+	\item Lister les spécialités des professeurs.
+	\item Obtenir le nom et prénom des élèves pesant moins de 45 kilos et inscrits en 1\up{ère} années ou élèves inscrits en 2\up{ème} années.
+	\item Obtenir les nom des élèves dont le poids est compris entre 60 et 80 kilos.
+	\item Obtenir les nom des professeurs dont la spécialité est 'poésie' ou 'sql'.
+	\item Obtenir les nom des élèves dont le nom commence par 'L'.
+	\item Obtenir les nom des professeurs dont la spécialité est inconnue.
+	\item Obtenir les nom et prénom des élèves pesant moins de 45 kilos et inscrits en 1\up{ère} année.
+	\item Obtenir pour chaque professeur, son nom et sa spécialité. Si cette dernière est inconnue, on souhaite afficher la chaîne de caractères : '****'.
+	\item Quels sont les noms et prénoms des élèves qui pratiquent du surf au niveau 1. Rédigez cette requête de cinq façons différentes.
+	\item Obtenir les nom des élèves de l'équipe AMC INDUS.
+	\item Obtenir les pairs de noms de professeurs qui ont la même spécialité.
+	\item Pour chaque spécialité sql/SQL, on demande d'obtenir son nom son salaire mensuel actuel et son augmentation mensuelle depuis son salaire de base.
+	\item Obtenir les nom des professeurs dont l'augmentation relative au salaire de bse dépasse 25\%.
+	\item Afficher les points de Tsuno obtenus dans chaque cours sur 100 plutôt que sur 20.
+	\item Obtenir le poids moyen des élèves de 1\up{ère} année.
+	\item Obtenir le total des points de l'élève numéro 3.
+	\item Obtenir la plus petite et la plus grande note de l'élève Brisefer.
+	\item Obtenir le nombre d'élèves inscrits en deuxième année.
+	\item Quelle est l'augmentation mensuelle moyenne des salaires des professeurs de SQL ?
+	\item Obtenir l'année de la dernière promotion du professeur Pucette.
+	\item Pour chaque professeur, afficher sa date d'embauche, sa date de dernière promotion ainsi que le nombre d'années écoulées entre ces deux dates.
+	\item Afficher l'âge moyen des élèves. Cet âge moyen sera exprimé en année.
+	\item Afficher les noms des professeurs pour lesquels il s'est écoulé plus de 50 mois entre l'embauche et la dernière promotion.
+	\item Obtenir la liste des élèves qui auront au moins 24 ans dans moins de 4 mois.
+	\item Obtenir la liste des élèves classée par année et par ordre alphabétique.
+	\item Afficher en ordre décroissant les points de Tsuno obtenus dans chaque cours sur 100 plutôt que sur 20.
+	\item Obtenir pour chaque élève de 1\up{ère} année son nom et sa moyenne.
+	\item Obtenir la moyenne des points de chaque élève de 1\up{ère} année dont le total des points est supérieur à 40.
+	\item Obtenir le maximum parmi les totaux de chaque élève.
+	\item Obtenirle nom des élèves qui jouent dans l'équipe AMC INDUS.
+	\item Quels sont les élèves de 1\up{ère} année dont la moyenne est supérieure à la moyenne de la 1\up{ère} année ?
+	\item Obtenir le nom et le poids des élèves de 1\up{ère} année plus lourds que n'importe quel élève de 2\up{ème} années.
+	\item Obtenir le nom et le poids des élèves de 1\up{ère} année plus lourds qu'un élève quelconque de 2\up{ème} années.
+	\item Obtenir le nom, le poids et l'année des élèves dont le poids est supérieur au poids moyen des élèves étant dans la même année d'études.
+	\item Obtenir les noms des professeurs qui ne donnent pas le cours numéro 1.
+	\item Obtenir les noms des élèves de 1\up{ère} année qui ont obtenu plus de 60\% et qui jouent au tennis. 
+	\item Professeurs qui prennent en charge tous les cours de deuxième année, on demande le Numéro et le nom.
+	\item Élèves qui pratiquent toutes les activités, on demande le Numéro et le nom.
+
+\end{enumerate}
+
+\end{document}
